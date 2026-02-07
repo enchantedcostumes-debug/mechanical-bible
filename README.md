@@ -177,3 +177,4 @@ This project exists to restore what was corrupted. The original Hebrew pictograp
 **Copyright (c) 2026 Tammy L Casey. All rights reserved.**
 
 *"Known by our fruits, not our roots"*
+
