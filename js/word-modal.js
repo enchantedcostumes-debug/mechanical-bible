@@ -25,7 +25,7 @@ let greekLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
-const DB_VERSION = 4;  // v4: Fixed definition fallback - words.json now has all definitions
+const DB_VERSION = 5;  // v5: Added 6-stage corruption timelines for 46 control words
 const STORE_NAME = 'wordData';
 
 // Hebrew prefix characters that can be stripped for root lookup
@@ -305,6 +305,133 @@ function lookupGreek(hebrew) {
 }
 
 // ============================================================================
+// TIMELINE BUILDER
+// ============================================================================
+
+function buildTimelineStages(word, pictographic, septuagintDisplay, ntGreekDisplay, vulgateDisplay, kjvDisplay, definition, timeline) {
+    // If this is a control word with corruption_timeline, use that data
+    const ct = word.corruption_timeline;
+
+    if (ct) {
+        // Use the detailed corruption timeline for control words
+        return `
+            <div class="word-timeline-stage">
+                <div class="word-timeline-num">1</div>
+                <div class="word-timeline-content">
+                    <strong>${ct.stage_1?.name || 'Original Hebrew'}</strong>
+                    <span class="word-timeline-period">(${ct.stage_1?.period || 'Ancient'})</span><br>
+                    <span class="word-timeline-hebrew">${word.hebrew}</span><br>
+                    <em class="original-meaning">${ct.stage_1?.meaning || pictographic}</em><br>
+                    <small class="mechanism">${ct.stage_1?.mechanism || ''}</small>
+                </div>
+            </div>
+            <div class="word-timeline-stage">
+                <div class="word-timeline-num">2</div>
+                <div class="word-timeline-content">
+                    <strong>${ct.stage_2?.name || 'Septuagint Greek'}</strong>
+                    <span class="word-timeline-period">(${ct.stage_2?.period || '280 BCE'})</span><br>
+                    ${ct.stage_2?.text ? `<span class="greek-word">${ct.stage_2.text}</span>` : ''}
+                    ${ct.stage_2?.transliteration ? ` (${ct.stage_2.transliteration})` : ''}<br>
+                    <em>${ct.stage_2?.meaning || septuagintDisplay}</em><br>
+                    <small class="mechanism decay">${ct.stage_2?.mechanism || ''}</small>
+                </div>
+            </div>
+            <div class="word-timeline-stage">
+                <div class="word-timeline-num">3</div>
+                <div class="word-timeline-content">
+                    <strong>${ct.stage_3?.name || 'NT Greek'}</strong>
+                    <span class="word-timeline-period">(${ct.stage_3?.period || '100 CE'})</span><br>
+                    ${ct.stage_3?.text ? `<span class="greek-word">${ct.stage_3.text}</span>` : ''}<br>
+                    <em>${ct.stage_3?.meaning || ntGreekDisplay}</em><br>
+                    <small class="mechanism decay">${ct.stage_3?.mechanism || ''}</small>
+                </div>
+            </div>
+            <div class="word-timeline-stage">
+                <div class="word-timeline-num">4</div>
+                <div class="word-timeline-content">
+                    <strong>${ct.stage_4?.name || 'Latin Vulgate'}</strong>
+                    <span class="word-timeline-period">(${ct.stage_4?.period || '400 CE'})</span><br>
+                    <em>${ct.stage_4?.text || '(Latin)'}</em><br>
+                    <em>${ct.stage_4?.meaning || vulgateDisplay}</em><br>
+                    <small class="mechanism decay">${ct.stage_4?.mechanism || ''}</small>
+                </div>
+            </div>
+            <div class="word-timeline-stage">
+                <div class="word-timeline-num">5</div>
+                <div class="word-timeline-content">
+                    <strong>${ct.stage_5?.name || 'King James'}</strong>
+                    <span class="word-timeline-period">(${ct.stage_5?.period || '1611 CE'})</span><br>
+                    <em>${ct.stage_5?.text || kjvDisplay}</em><br>
+                    <small class="mechanism decay">${ct.stage_5?.mechanism || ''}</small>
+                </div>
+            </div>
+            <div class="word-timeline-stage corrupted">
+                <div class="word-timeline-num">6</div>
+                <div class="word-timeline-content">
+                    <strong>${ct.stage_6?.name || 'Modern English'}</strong>
+                    <span class="word-timeline-period">(${ct.stage_6?.period || 'Today'})</span><br>
+                    <em class="corrupted-meaning">${ct.stage_6?.meaning || definition}</em><br>
+                    <small class="mechanism decay final">${ct.stage_6?.mechanism || ''}</small>
+                </div>
+            </div>
+        `;
+    }
+
+    // Default timeline for non-control words
+    return `
+        <div class="word-timeline-stage">
+            <div class="word-timeline-num">1</div>
+            <div class="word-timeline-content">
+                <strong>Hebrew Original</strong>
+                <span class="word-timeline-period">(Ancient)</span><br>
+                <span class="word-timeline-hebrew">${word.hebrew}</span><br>
+                ${pictographic || 'Pictographic meaning from letters'}
+            </div>
+        </div>
+        <div class="word-timeline-stage">
+            <div class="word-timeline-num">2</div>
+            <div class="word-timeline-content">
+                <strong>Septuagint (LXX)</strong>
+                <span class="word-timeline-period">(280 BCE)</span><br>
+                <em>${septuagintDisplay}</em>
+            </div>
+        </div>
+        <div class="word-timeline-stage">
+            <div class="word-timeline-num">3</div>
+            <div class="word-timeline-content">
+                <strong>New Testament Greek</strong>
+                <span class="word-timeline-period">(100 CE)</span><br>
+                <em>${ntGreekDisplay}</em>
+            </div>
+        </div>
+        <div class="word-timeline-stage">
+            <div class="word-timeline-num">4</div>
+            <div class="word-timeline-content">
+                <strong>Latin Vulgate</strong>
+                <span class="word-timeline-period">(400 CE)</span><br>
+                <em>${vulgateDisplay}</em>
+            </div>
+        </div>
+        <div class="word-timeline-stage">
+            <div class="word-timeline-num">5</div>
+            <div class="word-timeline-content">
+                <strong>King James Version</strong>
+                <span class="word-timeline-period">(1611 CE)</span><br>
+                <em>${kjvDisplay}</em>
+            </div>
+        </div>
+        <div class="word-timeline-stage">
+            <div class="word-timeline-num">6</div>
+            <div class="word-timeline-content">
+                <strong>Modern English</strong>
+                <span class="word-timeline-period">(Today)</span><br>
+                ${definition || timeline.modern || 'See pictographic meaning'}
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================================
 // MODAL FUNCTIONS
 // ============================================================================
 
@@ -492,56 +619,10 @@ function buildWordHTML(word) {
         <p><strong>First Occurrence:</strong> ${word.first_occurrence || def?.first_occurrence || 'N/A'}</p>
 
         <h3 class="word-section-header">6-Stage Corruption Timeline</h3>
+        ${word.is_control_word ? `<div class="control-word-badge">[!] CONTROL WORD - Meaning deliberately altered</div>` : ''}
+        ${word.control_mechanism ? `<div class="control-mechanism"><strong>Decay:</strong> ${word.control_mechanism}</div>` : ''}
         <div class="word-timeline">
-            <div class="word-timeline-stage">
-                <div class="word-timeline-num">1</div>
-                <div class="word-timeline-content">
-                    <strong>Hebrew Original</strong>
-                    <span class="word-timeline-period">(Ancient)</span><br>
-                    <span class="word-timeline-hebrew">${word.hebrew}</span><br>
-                    ${pictographic || 'Pictographic meaning from letters'}
-                </div>
-            </div>
-            <div class="word-timeline-stage">
-                <div class="word-timeline-num">2</div>
-                <div class="word-timeline-content">
-                    <strong>Septuagint (LXX)</strong>
-                    <span class="word-timeline-period">(280 BCE)</span><br>
-                    <em>${septuagintDisplay}</em>
-                </div>
-            </div>
-            <div class="word-timeline-stage">
-                <div class="word-timeline-num">3</div>
-                <div class="word-timeline-content">
-                    <strong>New Testament Greek</strong>
-                    <span class="word-timeline-period">(100 CE)</span><br>
-                    <em>${ntGreekDisplay}</em>
-                </div>
-            </div>
-            <div class="word-timeline-stage">
-                <div class="word-timeline-num">4</div>
-                <div class="word-timeline-content">
-                    <strong>Latin Vulgate</strong>
-                    <span class="word-timeline-period">(400 CE)</span><br>
-                    <em>${vulgateDisplay}</em>
-                </div>
-            </div>
-            <div class="word-timeline-stage">
-                <div class="word-timeline-num">5</div>
-                <div class="word-timeline-content">
-                    <strong>King James Version</strong>
-                    <span class="word-timeline-period">(1611 CE)</span><br>
-                    <em>${kjvDisplay}</em>
-                </div>
-            </div>
-            <div class="word-timeline-stage">
-                <div class="word-timeline-num">6</div>
-                <div class="word-timeline-content">
-                    <strong>Modern English</strong>
-                    <span class="word-timeline-period">(Today)</span><br>
-                    ${definition || timeline.modern || 'See pictographic meaning'}
-                </div>
-            </div>
+            ${buildTimelineStages(word, pictographic, septuagintDisplay, ntGreekDisplay, vulgateDisplay, kjvDisplay, definition, timeline)}
         </div>
 
         <div class="word-sources">
