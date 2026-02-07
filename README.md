@@ -4,6 +4,18 @@
 
 ---
 
+## Acknowledgment
+
+This project stands on the shoulders of **Jeff Benner** and his groundbreaking work at the [Ancient Hebrew Research Center](https://www.ancient-hebrew.org/). His *Ancient Hebrew Lexicon of the Bible (AHLB)* planted the seed that became this project.
+
+Jeff Benner recognized what scholars had overlooked for centuries: that Hebrew is not an abstract language but a **concrete, physical language** rooted in the pictographic origins of its letters. Each letter was originally a picture conveying tangible meaning.
+
+The Mechanical Bible extends this insight to its logical conclusion: **every word in scripture can be read mechanically** by combining the pictographic meanings of its constituent letters. No interpretation required. No denomination. Just the mechanism of the text itself.
+
+**Thank you, Jeff, for planting the seed.**
+
+---
+
 ## What Is This?
 
 The Mechanical Bible is a word-by-word analysis of Hebrew scripture that:
