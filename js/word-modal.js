@@ -16,17 +16,20 @@
 // ============================================================================
 
 let wordData = null;
-let strongsData = null;  // Hebrew Strong's concordance for definitions
+let hebrewDefs = null;  // Hebrew definitions keyed by Hebrew word
 let greekMapping = null; // Hebrew to Greek Septuagint mapping
 let priorityLoaded = false;
 let fullLoaded = false;
-let strongsLoaded = false;
+let defsLoaded = false;
 let greekLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;  // Increment version for new data structure
 const STORE_NAME = 'wordData';
+
+// Hebrew prefix characters that can be stripped for root lookup
+const HEBREW_PREFIXES = ['ה', 'ב', 'כ', 'ל', 'מ', 'ו', 'ש'];
 
 // ============================================================================
 // INDEXEDDB FUNCTIONS
@@ -83,20 +86,20 @@ async function saveToIndexedDB(key, value) {
 // LOADING FUNCTIONS
 // ============================================================================
 
-async function loadStrongsData() {
-    if (strongsLoaded && strongsData) return strongsData;
+async function loadHebrewDefinitions() {
+    if (defsLoaded && hebrewDefs) return hebrewDefs;
 
     try {
-        const response = await fetch('/data/hebrew_strongs.json');
+        const response = await fetch('/data/hebrew_definitions.json');
         if (response.ok) {
-            strongsData = await response.json();
-            strongsLoaded = true;
-            console.log('[OK] Hebrew Strongs loaded: ' + Object.keys(strongsData).length + ' entries');
+            hebrewDefs = await response.json();
+            defsLoaded = true;
+            console.log('[OK] Hebrew definitions loaded: ' + Object.keys(hebrewDefs).length + ' entries');
         }
     } catch (e) {
-        console.warn('[WARN] Could not load Strongs data:', e.message);
+        console.warn('[WARN] Could not load Hebrew definitions:', e.message);
     }
-    return strongsData;
+    return hebrewDefs;
 }
 
 async function loadGreekMapping() {
@@ -228,6 +231,80 @@ function updateLoadingIndicator(message) {
 }
 
 // ============================================================================
+// DEFINITION LOOKUP FUNCTIONS
+// ============================================================================
+
+/**
+ * Look up definition for a Hebrew word
+ * Tries exact match first, then strips prefixes to find root word
+ */
+function lookupDefinition(hebrew) {
+    if (!hebrewDefs) return null;
+
+    // Try exact match first
+    if (hebrewDefs[hebrew]) {
+        return hebrewDefs[hebrew];
+    }
+
+    // Try stripping common prefixes
+    for (const prefix of HEBREW_PREFIXES) {
+        if (hebrew.startsWith(prefix) && hebrew.length > 1) {
+            const stripped = hebrew.substring(1);
+            if (hebrewDefs[stripped]) {
+                // Return with note about prefix
+                const def = { ...hebrewDefs[stripped] };
+                def.hasPrefix = true;
+                def.prefixNote = `(with prefix ${prefix})`;
+                return def;
+            }
+        }
+    }
+
+    // Try stripping two prefixes (e.g., וה = and + the)
+    if (hebrew.length > 2) {
+        for (const prefix1 of HEBREW_PREFIXES) {
+            for (const prefix2 of HEBREW_PREFIXES) {
+                if (hebrew.startsWith(prefix1 + prefix2)) {
+                    const stripped = hebrew.substring(2);
+                    if (hebrewDefs[stripped]) {
+                        const def = { ...hebrewDefs[stripped] };
+                        def.hasPrefix = true;
+                        def.prefixNote = `(with prefixes ${prefix1}${prefix2})`;
+                        return def;
+                    }
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Look up Greek Septuagint translation for a Hebrew word
+ */
+function lookupGreek(hebrew) {
+    if (!greekMapping) return null;
+
+    // Try exact match
+    if (greekMapping[hebrew]) {
+        return greekMapping[hebrew];
+    }
+
+    // Try stripping prefixes
+    for (const prefix of HEBREW_PREFIXES) {
+        if (hebrew.startsWith(prefix) && hebrew.length > 1) {
+            const stripped = hebrew.substring(1);
+            if (greekMapping[stripped]) {
+                return greekMapping[stripped];
+            }
+        }
+    }
+
+    return null;
+}
+
+// ============================================================================
 // MODAL FUNCTIONS
 // ============================================================================
 
@@ -304,25 +381,34 @@ async function showWordEvolution(hebrew) {
 }
 
 function buildWordHTML(word) {
-    // Look up Strong's data for definition and transliteration
-    const strongs = strongsData ? strongsData[word.hebrew] : null;
-    const translit = strongs?.translit || word.transliteration || '';
-    const phonetic = strongs?.phonetic || '';
-    const definition = strongs?.definition || '';
-    const usage = strongs?.usage || '';
+    // Look up definition from Hebrew definitions database
+    const def = lookupDefinition(word.hebrew);
+    const translit = def?.transliteration || word.transliteration || '';
+    const definition = def?.definition || '';
+    const strongs = def?.strongs || word.strongs || '';
+    const prefixNote = def?.prefixNote || '';
 
     // Build letter table rows
     let letterRows = '';
-    if (word.letters && word.letters.length > 0) {
-        for (const letter of word.letters) {
+    const letters = def?.letters || word.letters || [];
+    if (letters && letters.length > 0) {
+        for (const letter of letters) {
+            // Handle both formats (from word.letters and def.letters)
+            const char = letter.char || letter.letter || '';
+            const name = letter.name || '';
+            const value = letter.value || '';
+            const pictograph = letter.pictograph || letter.proto_sinaitic || '';
+            const concrete = letter.concrete || '';
+            const abstract = letter.abstract || '';
+
             letterRows += `
                 <tr>
-                    <td style="font-size:1.5rem">${letter.char}</td>
-                    <td>${letter.name}</td>
-                    <td>${letter.value}</td>
-                    <td>${letter.pictograph}</td>
-                    <td>${letter.concrete}</td>
-                    <td>${letter.abstract}</td>
+                    <td style="font-size:1.5rem">${char}</td>
+                    <td>${name}</td>
+                    <td>${value}</td>
+                    <td>${pictograph}</td>
+                    <td>${concrete}</td>
+                    <td>${abstract}</td>
                 </tr>
             `;
         }
@@ -330,50 +416,62 @@ function buildWordHTML(word) {
 
     // Build timeline - get Greek from mapping if available
     const timeline = word.timeline || {};
-    const greek = greekMapping ? greekMapping[word.hebrew] : null;
+    const greek = lookupGreek(word.hebrew);
 
     // Build Septuagint display
-    let septuagintDisplay = timeline.septuagint || '(Research in progress)';
-    if (greek && septuagintDisplay === '(Research in progress)') {
+    let septuagintDisplay = timeline.septuagint || '';
+    if (greek) {
         septuagintDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit}) - "${greek.meaning}"`;
+    } else if (!septuagintDisplay) {
+        septuagintDisplay = '(Research in progress)';
     }
 
     // NT Greek - often same as LXX for theological terms
-    let ntGreekDisplay = timeline.nt_greek || '(Research in progress)';
-    if (greek && ntGreekDisplay === '(Research in progress)') {
-        ntGreekDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit}) - Same as LXX`;
+    let ntGreekDisplay = timeline.nt_greek || '';
+    if (greek && !ntGreekDisplay) {
+        ntGreekDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit})`;
+    } else if (!ntGreekDisplay) {
+        ntGreekDisplay = '(Research in progress)';
     }
+
+    // Latin Vulgate
+    const vulgateDisplay = def?.vulgate_translation || timeline.vulgate || '(Research in progress)';
+
+    // KJV
+    const kjvDisplay = def?.kjv_translation || timeline.kjv || '(Research in progress)';
+
+    // Pictographic meaning - prefer from definitions if available
+    const pictographic = def?.pictographic_meaning || word.pictographic || '';
 
     return `
         <div class="word-header-section">
             <div class="word-language-badge">Hebrew</div>
             <div class="word-hebrew-large">${word.hebrew}</div>
-            ${translit ? `<div class="word-translit">(${translit}${phonetic ? ' - ' + phonetic : ''})</div>` : ''}
+            ${translit ? `<div class="word-translit">(${translit}) ${prefixNote}</div>` : ''}
             ${definition ? `<div class="word-definition"><strong>Meaning:</strong> ${definition}</div>` : ''}
-            ${usage ? `<div class="word-usage"><strong>Translated as:</strong> ${usage}</div>` : ''}
         </div>
 
         <div class="word-stats-row">
             <div class="word-stat-box">
-                <div class="word-stat-value">${word.strongs || 'N/A'}</div>
+                <div class="word-stat-value">${strongs || 'N/A'}</div>
                 <div class="word-stat-label">Strong's #</div>
             </div>
             <div class="word-stat-box">
-                <div class="word-stat-value">${word.gematria}</div>
+                <div class="word-stat-value">${word.gematria || def?.gematria || 'N/A'}</div>
                 <div class="word-stat-label">Gematria</div>
             </div>
             <div class="word-stat-box">
-                <div class="word-stat-value">${word.digital_root}</div>
+                <div class="word-stat-value">${word.digital_root || def?.digital_root || 'N/A'}</div>
                 <div class="word-stat-label">Digital Root</div>
             </div>
             <div class="word-stat-box">
-                <div class="word-stat-value">${word.frequency}</div>
+                <div class="word-stat-value">${word.frequency || def?.frequency || 'N/A'}</div>
                 <div class="word-stat-label">Occurrences</div>
             </div>
         </div>
 
         <h3 class="word-section-header">Pictographic Meaning</h3>
-        <div class="word-pictographic">${word.pictographic}</div>
+        <div class="word-pictographic">${pictographic || 'See letter analysis below'}</div>
 
         <h3 class="word-section-header">Letter-by-Letter Analysis</h3>
         <table class="word-letter-table">
@@ -388,7 +486,7 @@ function buildWordHTML(word) {
             ${letterRows}
         </table>
 
-        <p><strong>First Occurrence:</strong> ${word.first_occurrence}</p>
+        <p><strong>First Occurrence:</strong> ${word.first_occurrence || def?.first_occurrence || 'N/A'}</p>
 
         <h3 class="word-section-header">6-Stage Corruption Timeline</h3>
         <div class="word-timeline">
@@ -398,7 +496,7 @@ function buildWordHTML(word) {
                     <strong>Hebrew Original</strong>
                     <span class="word-timeline-period">(Ancient)</span><br>
                     <span class="word-timeline-hebrew">${word.hebrew}</span><br>
-                    ${timeline.hebrew || word.pictographic}
+                    ${pictographic || 'Pictographic meaning from letters'}
                 </div>
             </div>
             <div class="word-timeline-stage">
@@ -422,7 +520,7 @@ function buildWordHTML(word) {
                 <div class="word-timeline-content">
                     <strong>Latin Vulgate</strong>
                     <span class="word-timeline-period">(400 CE)</span><br>
-                    <em>${timeline.vulgate || '(Research in progress)'}</em>
+                    <em>${vulgateDisplay}</em>
                 </div>
             </div>
             <div class="word-timeline-stage">
@@ -430,7 +528,7 @@ function buildWordHTML(word) {
                 <div class="word-timeline-content">
                     <strong>King James Version</strong>
                     <span class="word-timeline-period">(1611 CE)</span><br>
-                    <em>${timeline.kjv || '(Research in progress)'}</em>
+                    <em>${kjvDisplay}</em>
                 </div>
             </div>
             <div class="word-timeline-stage">
@@ -438,14 +536,14 @@ function buildWordHTML(word) {
                 <div class="word-timeline-content">
                     <strong>Modern English</strong>
                     <span class="word-timeline-period">(Today)</span><br>
-                    ${timeline.modern || 'See pictographic meaning'}
+                    ${definition || timeline.modern || 'See pictographic meaning'}
                 </div>
             </div>
         </div>
 
         <div class="word-sources">
             <strong>Sources:</strong><br>
-            - Strong's Concordance (${word.strongs || 'N/A'})<br>
+            - Strong's Concordance (${strongs || 'N/A'})<br>
             - Ancient Hebrew Lexicon of the Bible (AHLB, Jeff Benner)<br>
             - Proto-Sinaitic pictograph analysis<br>
             - Masoretic Text concordance
@@ -494,8 +592,8 @@ function initWordModal() {
         }
     });
 
-    // Load Strong's data for definitions (small file, load immediately)
-    loadStrongsData().catch(() => {});
+    // Load Hebrew definitions (2.2 MB - has all 1,640 words with definitions)
+    loadHebrewDefinitions().catch(() => {});
 
     // Load Hebrew-Greek mapping for timeline
     loadGreekMapping().catch(() => {});
