@@ -25,7 +25,7 @@ let greekLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
-const DB_VERSION = 3;  // Increment version - now includes transliteration and definition
+const DB_VERSION = 4;  // v4: Fixed definition fallback - words.json now has all definitions
 const STORE_NAME = 'wordData';
 
 // Hebrew prefix characters that can be stripped for root lookup
@@ -381,11 +381,14 @@ async function showWordEvolution(hebrew) {
 }
 
 function buildWordHTML(word) {
-    // Look up definition from Hebrew definitions database
+    // Look up definition from Hebrew definitions database (secondary source)
     const def = lookupDefinition(word.hebrew);
-    const translit = def?.transliteration || word.transliteration || '';
-    const definition = def?.definition || '';
-    const strongs = def?.strongs || word.strongs || '';
+
+    // Primary: Use data from words.json (now has all 58,400 definitions)
+    // Secondary: Fall back to hebrew_definitions.json lookup
+    const translit = word.transliteration || def?.transliteration || '';
+    const definition = word.definition || def?.definition || '';
+    const strongs = word.strongs || def?.strongs || '';
     const prefixNote = def?.prefixNote || '';
 
     // Build letter table rows
