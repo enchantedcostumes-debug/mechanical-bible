@@ -27,7 +27,7 @@ let timelinesLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
-const DB_VERSION = 6;  // v6: Separate timelines.json for ALL 58,400 words
+const DB_VERSION = 7;  // v7: Load timelines immediately with words (parallel loading)
 const STORE_NAME = 'wordData';
 
 // Hebrew prefix characters that can be stripped for root lookup
@@ -123,19 +123,38 @@ async function loadGreekMapping() {
 async function loadWordData() {
     // Already have full data
     if (fullLoaded && wordData) {
+        // Make sure timelines are also loading
+        if (!timelinesLoaded) loadTimelinesInBackground();
         return wordData;
     }
 
     // Check IndexedDB first (instant if cached)
     if (loadingStatus === 'idle') {
         loadingStatus = 'checking';
-        const cached = await getFromIndexedDB('fullLexicon');
-        if (cached && Object.keys(cached).length > 50000) {
-            wordData = cached;
+
+        // Load cached words and timelines in parallel
+        const [cachedWords, cachedTimelines] = await Promise.all([
+            getFromIndexedDB('fullLexicon'),
+            getFromIndexedDB('timelines')
+        ]);
+
+        if (cachedWords && Object.keys(cachedWords).length > 50000) {
+            wordData = cachedWords;
             fullLoaded = true;
             priorityLoaded = true;
             loadingStatus = 'cached';
-            console.log('[OK] Loaded ' + Object.keys(cached).length + ' words from IndexedDB cache');
+            console.log('[OK] Loaded ' + Object.keys(cachedWords).length + ' words from IndexedDB cache');
+        }
+
+        if (cachedTimelines && Object.keys(cachedTimelines).length > 50000) {
+            timelineData = cachedTimelines;
+            timelinesLoaded = true;
+            console.log('[OK] Loaded ' + Object.keys(cachedTimelines).length + ' timelines from IndexedDB cache');
+        }
+
+        if (wordData) {
+            // Start background loading for anything not cached
+            if (!timelinesLoaded) loadTimelinesInBackground();
             return wordData;
         }
     }
@@ -151,8 +170,9 @@ async function loadWordData() {
                 priorityLoaded = true;
                 console.log('[OK] Priority words loaded: ' + Object.keys(priority).length + ' words (modal ready)');
 
-                // Start background load of full lexicon
+                // Start background load of full lexicon AND timelines
                 loadFullLexiconInBackground();
+                loadTimelinesInBackground();
             }
         } catch (e) {
             console.warn('[WARN] Priority words failed, loading full lexicon:', e.message);
