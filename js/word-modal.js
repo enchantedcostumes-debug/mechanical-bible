@@ -16,8 +16,12 @@
 // ============================================================================
 
 let wordData = null;
+let strongsData = null;  // Hebrew Strong's concordance for definitions
+let greekMapping = null; // Hebrew to Greek Septuagint mapping
 let priorityLoaded = false;
 let fullLoaded = false;
+let strongsLoaded = false;
+let greekLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
@@ -78,6 +82,38 @@ async function saveToIndexedDB(key, value) {
 // ============================================================================
 // LOADING FUNCTIONS
 // ============================================================================
+
+async function loadStrongsData() {
+    if (strongsLoaded && strongsData) return strongsData;
+
+    try {
+        const response = await fetch('/data/hebrew_strongs.json');
+        if (response.ok) {
+            strongsData = await response.json();
+            strongsLoaded = true;
+            console.log('[OK] Hebrew Strongs loaded: ' + Object.keys(strongsData).length + ' entries');
+        }
+    } catch (e) {
+        console.warn('[WARN] Could not load Strongs data:', e.message);
+    }
+    return strongsData;
+}
+
+async function loadGreekMapping() {
+    if (greekLoaded && greekMapping) return greekMapping;
+
+    try {
+        const response = await fetch('/data/hebrew_greek_mapping.json');
+        if (response.ok) {
+            greekMapping = await response.json();
+            greekLoaded = true;
+            console.log('[OK] Hebrew-Greek mapping loaded: ' + Object.keys(greekMapping).length + ' entries');
+        }
+    } catch (e) {
+        console.warn('[WARN] Could not load Greek mapping:', e.message);
+    }
+    return greekMapping;
+}
 
 async function loadWordData() {
     // Already have full data
@@ -268,6 +304,13 @@ async function showWordEvolution(hebrew) {
 }
 
 function buildWordHTML(word) {
+    // Look up Strong's data for definition and transliteration
+    const strongs = strongsData ? strongsData[word.hebrew] : null;
+    const translit = strongs?.translit || word.transliteration || '';
+    const phonetic = strongs?.phonetic || '';
+    const definition = strongs?.definition || '';
+    const usage = strongs?.usage || '';
+
     // Build letter table rows
     let letterRows = '';
     if (word.letters && word.letters.length > 0) {
@@ -285,11 +328,30 @@ function buildWordHTML(word) {
         }
     }
 
-    // Build timeline
+    // Build timeline - get Greek from mapping if available
     const timeline = word.timeline || {};
+    const greek = greekMapping ? greekMapping[word.hebrew] : null;
+
+    // Build Septuagint display
+    let septuagintDisplay = timeline.septuagint || '(Research in progress)';
+    if (greek && septuagintDisplay === '(Research in progress)') {
+        septuagintDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit}) - "${greek.meaning}"`;
+    }
+
+    // NT Greek - often same as LXX for theological terms
+    let ntGreekDisplay = timeline.nt_greek || '(Research in progress)';
+    if (greek && ntGreekDisplay === '(Research in progress)') {
+        ntGreekDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit}) - Same as LXX`;
+    }
 
     return `
-        <div class="word-hebrew-large">${word.hebrew}</div>
+        <div class="word-header-section">
+            <div class="word-language-badge">Hebrew</div>
+            <div class="word-hebrew-large">${word.hebrew}</div>
+            ${translit ? `<div class="word-translit">(${translit}${phonetic ? ' - ' + phonetic : ''})</div>` : ''}
+            ${definition ? `<div class="word-definition"><strong>Meaning:</strong> ${definition}</div>` : ''}
+            ${usage ? `<div class="word-usage"><strong>Translated as:</strong> ${usage}</div>` : ''}
+        </div>
 
         <div class="word-stats-row">
             <div class="word-stat-box">
@@ -344,7 +406,7 @@ function buildWordHTML(word) {
                 <div class="word-timeline-content">
                     <strong>Septuagint (LXX)</strong>
                     <span class="word-timeline-period">(280 BCE)</span><br>
-                    <em>${timeline.septuagint || '(Research in progress)'}</em>
+                    <em>${septuagintDisplay}</em>
                 </div>
             </div>
             <div class="word-timeline-stage">
@@ -352,7 +414,7 @@ function buildWordHTML(word) {
                 <div class="word-timeline-content">
                     <strong>New Testament Greek</strong>
                     <span class="word-timeline-period">(100 CE)</span><br>
-                    <em>${timeline.nt_greek || '(Research in progress)'}</em>
+                    <em>${ntGreekDisplay}</em>
                 </div>
             </div>
             <div class="word-timeline-stage">
@@ -431,6 +493,12 @@ function initWordModal() {
             closeWordModal();
         }
     });
+
+    // Load Strong's data for definitions (small file, load immediately)
+    loadStrongsData().catch(() => {});
+
+    // Load Hebrew-Greek mapping for timeline
+    loadGreekMapping().catch(() => {});
 
     // Start loading immediately (check IndexedDB, then priority, then background full)
     loadWordData().catch(() => {});
