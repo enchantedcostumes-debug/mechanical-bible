@@ -1,66 +1,201 @@
 /**
  * Word Evolution Modal - Mechanical Bible
- * Loads word data and displays evolution report in modal
+ * Priority Loading + IndexedDB Caching
+ *
+ * Loading Strategy:
+ * 1. Check IndexedDB for cached full lexicon (instant)
+ * 2. If not cached, load priority words first (~1MB, 923 words)
+ * 3. Background load full lexicon (~78MB, 58,400 words)
+ * 4. Store in IndexedDB for future visits
+ *
+ * Copyright (c) 2026 Tammy L Casey. All rights reserved.
  */
 
-// Word data cache
+// ============================================================================
+// STATE
+// ============================================================================
+
 let wordData = null;
-let wordDataLoading = false;
-let wordDataPromise = null;
+let priorityLoaded = false;
+let fullLoaded = false;
+let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
-/**
- * Load word data from JSON file (once, cached)
- */
-function loadWordData() {
-    if (wordData) {
-        return Promise.resolve(wordData);
-    }
+const DB_NAME = 'MechanicalBibleDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'wordData';
 
-    if (wordDataPromise) {
-        return wordDataPromise;
-    }
+// ============================================================================
+// INDEXEDDB FUNCTIONS
+// ============================================================================
 
-    wordDataLoading = true;
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-    // Show loading indicator
-    const modal = document.getElementById('wordModal');
-    if (modal) {
-        modal.querySelector('.word-modal-body').innerHTML = `
-            <div class="word-modal-loading">
-                Loading word database (58,400 words)...<br>
-                <small>This only happens once - data is cached.</small>
-            </div>
-        `;
-        modal.classList.add('show');
-    }
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
 
-    wordDataPromise = fetch('/words.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load word data');
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
             }
-            return response.json();
-        })
-        .then(data => {
-            wordData = data;
-            wordDataLoading = false;
-            console.log('[OK] Loaded ' + Object.keys(data).length + ' Hebrew words');
-            return data;
-        })
-        .catch(error => {
-            wordDataLoading = false;
-            console.error('[FAIL] Error loading word data:', error);
-            throw error;
-        });
-
-    return wordDataPromise;
+        };
+    });
 }
 
-/**
- * Show word evolution modal
- * @param {string} hebrew - The Hebrew word to display
- */
-function showWordEvolution(hebrew) {
+async function getFromIndexedDB(key) {
+    try {
+        const db = await openDatabase();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.get(key);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    } catch (e) {
+        console.warn('[WARN] IndexedDB not available:', e.message);
+        return null;
+    }
+}
+
+async function saveToIndexedDB(key, value) {
+    try {
+        const db = await openDatabase();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.put(value, key);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    } catch (e) {
+        console.warn('[WARN] Could not save to IndexedDB:', e.message);
+    }
+}
+
+// ============================================================================
+// LOADING FUNCTIONS
+// ============================================================================
+
+async function loadWordData() {
+    // Already have full data
+    if (fullLoaded && wordData) {
+        return wordData;
+    }
+
+    // Check IndexedDB first (instant if cached)
+    if (loadingStatus === 'idle') {
+        loadingStatus = 'checking';
+        const cached = await getFromIndexedDB('fullLexicon');
+        if (cached && Object.keys(cached).length > 50000) {
+            wordData = cached;
+            fullLoaded = true;
+            priorityLoaded = true;
+            loadingStatus = 'cached';
+            console.log('[OK] Loaded ' + Object.keys(cached).length + ' words from IndexedDB cache');
+            return wordData;
+        }
+    }
+
+    // Load priority words first (fast, ~1MB)
+    if (!priorityLoaded) {
+        loadingStatus = 'priority';
+        try {
+            const response = await fetch('/words-priority.json');
+            if (response.ok) {
+                const priority = await response.json();
+                wordData = priority;
+                priorityLoaded = true;
+                console.log('[OK] Priority words loaded: ' + Object.keys(priority).length + ' words (modal ready)');
+
+                // Start background load of full lexicon
+                loadFullLexiconInBackground();
+            }
+        } catch (e) {
+            console.warn('[WARN] Priority words failed, loading full lexicon:', e.message);
+        }
+    }
+
+    // If priority failed, fall back to full load
+    if (!wordData) {
+        return loadFullLexicon();
+    }
+
+    return wordData;
+}
+
+async function loadFullLexicon() {
+    loadingStatus = 'full';
+    updateLoadingIndicator('Loading complete lexicon (58,400 words)...');
+
+    const response = await fetch('/words.json');
+    if (!response.ok) {
+        throw new Error('Failed to load word data');
+    }
+
+    const data = await response.json();
+    wordData = data;
+    fullLoaded = true;
+    loadingStatus = 'cached';
+
+    console.log('[OK] Full lexicon loaded: ' + Object.keys(data).length + ' words');
+
+    // Save to IndexedDB for future visits
+    saveToIndexedDB('fullLexicon', data)
+        .then(() => console.log('[OK] Lexicon cached in IndexedDB'))
+        .catch(e => console.warn('[WARN] IndexedDB save failed:', e.message));
+
+    return data;
+}
+
+function loadFullLexiconInBackground() {
+    // Don't block - load in background after priority is ready
+    setTimeout(async () => {
+        if (fullLoaded) return;
+
+        console.log('[INFO] Background loading full lexicon...');
+        loadingStatus = 'full';
+
+        try {
+            const response = await fetch('/words.json');
+            if (response.ok) {
+                const data = await response.json();
+                wordData = data;
+                fullLoaded = true;
+                loadingStatus = 'cached';
+
+                console.log('[OK] Full lexicon loaded in background: ' + Object.keys(data).length + ' words');
+
+                // Save to IndexedDB
+                saveToIndexedDB('fullLexicon', data)
+                    .then(() => console.log('[OK] Lexicon cached in IndexedDB'))
+                    .catch(e => console.warn('[WARN] IndexedDB save failed:', e.message));
+            }
+        } catch (e) {
+            console.warn('[WARN] Background load failed:', e.message);
+        }
+    }, 2000); // Start after 2 seconds
+}
+
+function updateLoadingIndicator(message) {
+    const body = document.querySelector('.word-modal-body');
+    if (body) {
+        body.innerHTML = `
+            <div class="word-modal-loading">
+                ${message}<br>
+                <small>This only happens once - data is cached for instant access.</small>
+            </div>
+        `;
+    }
+}
+
+// ============================================================================
+// MODAL FUNCTIONS
+// ============================================================================
+
+async function showWordEvolution(hebrew) {
     const modal = document.getElementById('wordModal');
     if (!modal) {
         console.error('[FAIL] Modal element not found');
@@ -69,42 +204,69 @@ function showWordEvolution(hebrew) {
 
     const body = modal.querySelector('.word-modal-body');
 
-    // Show loading
-    body.innerHTML = '<div class="word-modal-loading">Loading...</div>';
+    // Show modal with loading
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
 
-    // Load data and display
-    loadWordData()
-        .then(data => {
-            const word = data[hebrew];
-            if (!word) {
+    // Check if we already have the word
+    if (wordData && wordData[hebrew]) {
+        body.innerHTML = buildWordHTML(wordData[hebrew]);
+        return;
+    }
+
+    // Show loading
+    if (loadingStatus === 'cached') {
+        body.innerHTML = '<div class="word-modal-loading">Looking up word...</div>';
+    } else if (loadingStatus === 'priority') {
+        body.innerHTML = '<div class="word-modal-loading">Loading priority words...</div>';
+    } else {
+        body.innerHTML = '<div class="word-modal-loading">Loading word database...</div>';
+    }
+
+    // Load data
+    try {
+        const data = await loadWordData();
+        const word = data[hebrew];
+
+        if (!word) {
+            // Word not in priority - try waiting for full load
+            if (!fullLoaded) {
                 body.innerHTML = `
                     <div class="word-modal-loading">
-                        Word not found: ${hebrew}<br>
-                        <small>This word may not be in our database yet.</small>
+                        Loading complete lexicon for: ${hebrew}<br>
+                        <small>This word is not in the priority set. Loading full database...</small>
                     </div>
                 `;
-                return;
+
+                // Wait for full lexicon
+                await loadFullLexicon();
+                const fullWord = wordData[hebrew];
+                if (fullWord) {
+                    body.innerHTML = buildWordHTML(fullWord);
+                    return;
+                }
             }
 
-            body.innerHTML = buildWordHTML(word);
-        })
-        .catch(error => {
             body.innerHTML = `
                 <div class="word-modal-loading">
-                    Error loading word data.<br>
-                    <small>${error.message}</small>
+                    Word not found: ${hebrew}<br>
+                    <small>This word may not be in our database yet.</small>
                 </div>
             `;
-        });
+            return;
+        }
+
+        body.innerHTML = buildWordHTML(word);
+    } catch (error) {
+        body.innerHTML = `
+            <div class="word-modal-loading">
+                Error loading word data.<br>
+                <small>${error.message}</small>
+            </div>
+        `;
+    }
 }
 
-/**
- * Build HTML for word evolution display
- * @param {object} word - Word data object
- * @returns {string} HTML string
- */
 function buildWordHTML(word) {
     // Build letter table rows
     let letterRows = '';
@@ -229,9 +391,6 @@ function buildWordHTML(word) {
     `;
 }
 
-/**
- * Close the word modal
- */
 function closeWordModal() {
     const modal = document.getElementById('wordModal');
     if (modal) {
@@ -240,9 +399,10 @@ function closeWordModal() {
     }
 }
 
-/**
- * Initialize modal - call this on page load
- */
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+
 function initWordModal() {
     // Create modal if it doesn't exist
     if (!document.getElementById('wordModal')) {
@@ -272,10 +432,8 @@ function initWordModal() {
         }
     });
 
-    // Preload word data in background
-    setTimeout(() => {
-        loadWordData().catch(() => {}); // Silent preload
-    }, 1000);
+    // Start loading immediately (check IndexedDB, then priority, then background full)
+    loadWordData().catch(() => {});
 }
 
 // Auto-initialize when DOM is ready
