@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en">
+    <title>Psalms 125 - Mathematical Bible</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Georgia, serif; background: #f8f6f3; color: #2c2416; line-height: 1.8; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+/* Header */
+h1 { text-align: center; margin-bottom: 10px; color: #1a365d; font-size: 2em; }
+.subtitle { text-align: center; color: #666; margin-bottom: 20px; font-style: italic; }
+.stats { text-align: center; color: #888; font-size: 0.9em; margin-bottom: 30px; }
+
+/* Navigation */
+nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+nav a { color: #1a365d; text-decoration: none; padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px; }
+nav a:hover { background: #1a365d; color: white; }
+
+/* Section headers */
+.section-header {
+    color: #1a365d; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;
+    margin: 30px 0 15px; border-bottom: 2px solid #1a365d; padding-bottom: 8px;
+}
+
+/* Book grid */
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 30px; }
+.book-card { padding: 12px; background: white; border: 1px solid #e0dcd5; text-decoration: none; color: #2c2416; border-radius: 4px; }
+.book-card:hover { border-color: #1a365d; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.book-card.coming { opacity: 0.5; pointer-events: none; background: #f5f5f5; }
+.book-name { font-weight: 600; font-size: 14px; }
+.book-stats { font-size: 11px; color: #888; margin-top: 4px; }
+
+/* Chapter navigation */
+.chapter-nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 20px 0; }
+.chapter-nav a { min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid #ddd; text-decoration: none; color: #666; border-radius: 4px; font-size: 14px; }
+.chapter-nav a:hover, .chapter-nav a.active { border-color: #1a365d; color: #1a365d; background: #f0f4f8; }
+
+/* Verse display - Blue Letter Bible style */
+.verse { margin: 20px 0; padding: 20px; background: white; border: 1px solid #e0dcd5; border-radius: 6px; }
+.verse-ref { color: #1a365d; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
+.verse-gematria { display: inline-block; background: #f0f4f8; padding: 2px 8px; border-radius: 3px;
+    font-size: 12px; color: #1a365d; margin-left: 10px; font-family: monospace; }
+
+/* Original text */
+.original-text { font-size: 1.4em; line-height: 2; margin: 15px 0; padding: 15px;
+    background: #fafaf8; border-radius: 4px; }
+.hebrew { direction: rtl; text-align: right; font-family: 'SBL Hebrew', 'Ezra SIL', 'Times New Roman', serif; }
+.greek { direction: ltr; text-align: left; font-family: 'SBL Greek', 'Gentium', 'Times New Roman', serif; }
+
+/* Clickable words */
+.word { cursor: pointer; padding: 4px 6px; border-radius: 3px; transition: all 0.2s; display: inline-block; margin: 2px; }
+.word:hover { background: #e8e4d9; }
+.word[data-gloss]:hover::after { content: attr(data-gloss); position: absolute; background: #333; color: white;
+    padding: 4px 8px; border-radius: 4px; font-size: 12px; z-index: 100; margin-top: 30px; }
+
+/* Translation */
+.translation { font-size: 1.1em; line-height: 1.8; margin: 15px 0; padding: 15px;
+    background: #fff; border-left: 4px solid #1a365d; }
+
+/* Footnotes */
+.footnotes { margin-top: 15px; padding: 15px; background: #f5f5f0; border-radius: 4px; font-size: 0.9em; }
+.footnotes h4 { color: #1a365d; margin-bottom: 10px; font-size: 12px; text-transform: uppercase; }
+.footnote { margin: 8px 0; padding-left: 20px; border-left: 2px solid #ddd; }
+.footnote-marker { color: #1a365d; font-weight: bold; }
+.footnote-alt { color: #666; font-style: italic; }
+
+/* Word analysis panel */
+.word-analysis { margin-top: 15px; padding: 15px; background: #f8f8f5; border-radius: 4px; }
+.word-analysis h4 { color: #1a365d; margin-bottom: 10px; }
+.letter-breakdown { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.letter-box { background: white; border: 1px solid #ddd; padding: 8px 12px; border-radius: 4px; text-align: center; min-width: 60px; }
+.letter-char { font-size: 24px; color: #1a365d; }
+.letter-name { font-size: 10px; color: #888; }
+.letter-value { font-size: 14px; color: #1a365d; font-weight: bold; }
+.letter-meaning { font-size: 9px; color: #666; margin-top: 4px; }
+
+/* Gematria summary */
+.gematria-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0; }
+.gematria-box { background: white; border: 1px solid #ddd; padding: 15px; border-radius: 6px; text-align: center; }
+.gematria-level { font-size: 11px; color: #888; text-transform: uppercase; }
+.gematria-value { font-size: 24px; color: #1a365d; font-weight: bold; font-family: monospace; }
+.gematria-label { font-size: 12px; color: #666; }
+
+/* Prev/Next navigation */
+.page-nav { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+.page-nav a { color: #1a365d; text-decoration: none; padding: 10px 20px; border: 1px solid #ddd; border-radius: 4px; }
+.page-nav a:hover { background: #f0f4f8; }
+
+/* Footer */
+footer { text-align: center; padding: 30px; color: #888; font-size: 12px; margin-top: 40px; border-top: 1px solid #ddd; }
+
+/* RED LETTER - Jesus' Words */
+.verse.red-letter { border-left: 4px solid #b91c1c; }
+.verse.red-letter .verse-ref::before { content: "[Jesus speaks]"; color: #b91c1c; font-weight: bold; font-size: 11px; margin-right: 10px; text-transform: uppercase; }
+.verse.red-letter .original-text { color: #b91c1c; font-weight: 600; }
+.verse.red-letter .translation { color: #b91c1c; font-weight: 600; border-left-color: #b91c1c; }
+.verse.red-letter .word { color: #b91c1c; }
+.verse.red-letter .word:hover { background: #fee2e2; }
+
+/* TSK Cross-References */
+.cross-refs { margin-top: 15px; padding: 15px; background: #f0f8ff; border-radius: 4px; border-left: 4px solid #3b82f6; }
+.cross-refs h4 { color: #1e40af; margin-bottom: 10px; font-size: 12px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.cross-refs h4::before { content: "TSK"; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+.cross-refs .theme-tag { display: inline-block; background: #1e40af; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 10px; font-weight: normal; text-transform: none; }
+.cross-refs ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.cross-refs li { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 3px; font-size: 12px; }
+.cross-refs li:hover { background: #e0f2fe; border-color: #3b82f6; cursor: pointer; }
+.cross-refs .ref-verse { color: #1e40af; font-weight: 600; }
+.cross-refs .ref-topic { color: #666; font-style: italic; margin-left: 5px; }
+
+/* Modal for word details */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; }
+.modal.show { display: flex; align-items: center; justify-content: center; }
+.modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+    border-bottom: 2px solid #1a365d; padding-bottom: 15px; }
+.modal-header h3 { margin: 0; color: #1a365d; font-size: 28px; }
+.close-btn { font-size: 28px; cursor: pointer; color: #999; }
+.close-btn:hover { color: #333; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .book-grid { grid-template-columns: repeat(2, 1fr); }
+    .gematria-summary { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+        <h1>Psalms</h1>
+        <p class="subtitle">Chapter 125</p>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="index.html">Chapters</a>
+        </nav>
+        <div class="chapter-nav"><a href="1.html">1</a><a href="2.html">2</a><a href="3.html">3</a><a href="4.html">4</a><a href="5.html">5</a><a href="6.html">6</a><a href="7.html">7</a><a href="8.html">8</a><a href="9.html">9</a><a href="10.html">10</a><a href="11.html">11</a><a href="12.html">12</a><a href="13.html">13</a><a href="14.html">14</a><a href="15.html">15</a><a href="16.html">16</a><a href="17.html">17</a><a href="18.html">18</a><a href="19.html">19</a><a href="20.html">20</a><a href="21.html">21</a><a href="22.html">22</a><a href="23.html">23</a><a href="24.html">24</a><a href="25.html">25</a><a href="26.html">26</a><a href="27.html">27</a><a href="28.html">28</a><a href="29.html">29</a><a href="30.html">30</a><a href="31.html">31</a><a href="32.html">32</a><a href="33.html">33</a><a href="34.html">34</a><a href="35.html">35</a><a href="36.html">36</a><a href="37.html">37</a><a href="38.html">38</a><a href="39.html">39</a><a href="40.html">40</a><a href="41.html">41</a><a href="42.html">42</a><a href="43.html">43</a><a href="44.html">44</a><a href="45.html">45</a><a href="46.html">46</a><a href="47.html">47</a><a href="48.html">48</a><a href="49.html">49</a><a href="50.html">50</a><a href="51.html">51</a><a href="52.html">52</a><a href="53.html">53</a><a href="54.html">54</a><a href="55.html">55</a><a href="56.html">56</a><a href="57.html">57</a><a href="58.html">58</a><a href="59.html">59</a><a href="60.html">60</a><a href="61.html">61</a><a href="62.html">62</a><a href="63.html">63</a><a href="64.html">64</a><a href="65.html">65</a><a href="66.html">66</a><a href="67.html">67</a><a href="68.html">68</a><a href="69.html">69</a><a href="70.html">70</a><a href="71.html">71</a><a href="72.html">72</a><a href="73.html">73</a><a href="74.html">74</a><a href="75.html">75</a><a href="76.html">76</a><a href="77.html">77</a><a href="78.html">78</a><a href="79.html">79</a><a href="80.html">80</a><a href="81.html">81</a><a href="82.html">82</a><a href="83.html">83</a><a href="84.html">84</a><a href="85.html">85</a><a href="86.html">86</a><a href="87.html">87</a><a href="88.html">88</a><a href="89.html">89</a><a href="90.html">90</a><a href="91.html">91</a><a href="92.html">92</a><a href="93.html">93</a><a href="94.html">94</a><a href="95.html">95</a><a href="96.html">96</a><a href="97.html">97</a><a href="98.html">98</a><a href="99.html">99</a><a href="100.html">100</a><a href="101.html">101</a><a href="102.html">102</a><a href="103.html">103</a><a href="104.html">104</a><a href="105.html">105</a><a href="106.html">106</a><a href="107.html">107</a><a href="108.html">108</a><a href="109.html">109</a><a href="110.html">110</a><a href="111.html">111</a><a href="112.html">112</a><a href="113.html">113</a><a href="114.html">114</a><a href="115.html">115</a><a href="116.html">116</a><a href="117.html">117</a><a href="118.html">118</a><a href="119.html">119</a><a href="120.html">120</a><a href="121.html">121</a><a href="122.html">122</a><a href="123.html">123</a><a href="124.html">124</a><a href="125.html" class="active">125</a><a href="126.html">126</a><a href="127.html">127</a><a href="128.html">128</a><a href="129.html">129</a><a href="130.html">130</a><a href="131.html">131</a><a href="132.html">132</a><a href="133.html">133</a><a href="134.html">134</a><a href="135.html">135</a><a href="136.html">136</a><a href="137.html">137</a><a href="138.html">138</a><a href="139.html">139</a><a href="140.html">140</a><a href="141.html">141</a><a href="142.html">142</a><a href="143.html">143</a><a href="144.html">144</a><a href="145.html">145</a><a href="146.html">146</a><a href="147.html">147</a><a href="148.html">148</a><a href="149.html">149</a><a href="150.html">150</a></div>
+            <div class="verse">
+                <div class="verse-ref">Psalms 125:1
+                    <span class="verse-gematria">Gematria: 2128</span>
+                </div>
+                <div class="original-text hebrew" lang="he" translate="no"><span class="word" lang="he" translate="no" onclick="showWordModal('שיר', [{"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}], '510', 'heb')">שיר</span> <span class="word" lang="he" translate="no" onclick="showWordModal('המעלות', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "מ", "name": "Mem", "value": 40, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ת", "name": "Tav", "value": 400, "picture": "Crossed sticks", "meaning": "Mark, sign, covenant"}], '551', 'heb')">המעלות</span> <span class="word" lang="he" translate="no" onclick="showWordModal('הבטחים', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "ט", "name": "Tet", "value": 9, "picture": "Basket/snake", "meaning": "Surround, contain, mud"}, {"char": "ח", "name": "Chet", "value": 8, "picture": "Wall/fence", "meaning": "Outside, divide, half"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '74', 'heb')">הבטחים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ביהוה', [{"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '28', 'heb')">ביהוה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('כהרציון', [{"char": "כ", "name": "Kaph", "value": 20, "picture": "Open palm", "meaning": "Open, allow, tame"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "צ", "name": "Tsade", "value": 90, "picture": "Man on side", "meaning": "Wait, chase, snare"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ן", "name": "Nun (final)", "value": 700, "picture": "Seed/fish", "meaning": "Continue, heir, son"}], '381', 'heb')">כהרציון</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לאימוט', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "א", "name": "Aleph", "value": 1, "picture": "Ox head", "meaning": "Strength, leader, first"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "מ", "name": "Mem", "value": 40, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ט", "name": "Tet", "value": 9, "picture": "Basket/snake", "meaning": "Surround, contain, mud"}], '96', 'heb')">לאימוט</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לעולם', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '176', 'heb')">לעולם</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ישב', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}], '312', 'heb')">ישב</span> </div>
+                <div class="translation">A song of ascents.Those who trust in GOD are like Mount Zionthat cannot be moved,enduring forever.</div><div class="word-analysis"><h4>Word-by-Word Analysis</h4><div class="letter-breakdown"><div class="letter-box">
+                        <div class="letter-char">שיר</div>
+                        <div class="letter-value">510</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">המעלות</div>
+                        <div class="letter-value">551</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">הבטחים</div>
+                        <div class="letter-value">74</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ביהוה</div>
+                        <div class="letter-value">28</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">כהרציון</div>
+                        <div class="letter-value">381</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לאימוט</div>
+                        <div class="letter-value">96</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לעולם</div>
+                        <div class="letter-value">176</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ישב</div>
+                        <div class="letter-value">312</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div></div></div></div>
+            <div class="verse">
+                <div class="verse-ref">Psalms 125:2
+                    <span class="verse-gematria">Gematria: 1943</span>
+                </div>
+                <div class="original-text hebrew" lang="he" translate="no"><span class="word" lang="he" translate="no" onclick="showWordModal('ירושלם', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '586', 'heb')">ירושלם</span> <span class="word" lang="he" translate="no" onclick="showWordModal('הרים', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '255', 'heb')">הרים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('סביב', [{"char": "ס", "name": "Samekh", "value": 60, "picture": "Thorn/shield", "meaning": "Grab, hate, protect"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}], '74', 'heb')">סביב</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לה', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '35', 'heb')">לה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ויהוה', [{"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '32', 'heb')">ויהוה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('סביב', [{"char": "ס", "name": "Samekh", "value": 60, "picture": "Thorn/shield", "meaning": "Grab, hate, protect"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}], '74', 'heb')">סביב</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לעמו', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "מ", "name": "Mem", "value": 40, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}], '146', 'heb')">לעמו</span> <span class="word" lang="he" translate="no" onclick="showWordModal('מעתה', [{"char": "מ", "name": "Mem", "value": 40, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ת", "name": "Tav", "value": 400, "picture": "Crossed sticks", "meaning": "Mark, sign, covenant"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '515', 'heb')">מעתה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ועדעולם', [{"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ד", "name": "Dalet", "value": 4, "picture": "Door", "meaning": "Door, pathway, enter"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '226', 'heb')">ועדעולם</span> </div>
+                <div class="translation">Jerusalem, hills enfold it,and GOD enfolds this peoplenow and forever.</div><div class="word-analysis"><h4>Word-by-Word Analysis</h4><div class="letter-breakdown"><div class="letter-box">
+                        <div class="letter-char">ירושלם</div>
+                        <div class="letter-value">586</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">הרים</div>
+                        <div class="letter-value">255</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">סביב</div>
+                        <div class="letter-value">74</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לה</div>
+                        <div class="letter-value">35</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ויהוה</div>
+                        <div class="letter-value">32</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">סביב</div>
+                        <div class="letter-value">74</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לעמו</div>
+                        <div class="letter-value">146</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">מעתה</div>
+                        <div class="letter-value">515</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ועדעולם</div>
+                        <div class="letter-value">226</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div></div></div></div>
+            <div class="verse">
+                <div class="verse-ref">Psalms 125:3
+                    <span class="verse-gematria">Gematria: 3035</span>
+                </div>
+                <div class="original-text hebrew" lang="he" translate="no"><span class="word" lang="he" translate="no" onclick="showWordModal('כי', [{"char": "כ", "name": "Kaph", "value": 20, "picture": "Open palm", "meaning": "Open, allow, tame"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}], '30', 'heb')">כי</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לא', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "א", "name": "Aleph", "value": 1, "picture": "Ox head", "meaning": "Strength, leader, first"}], '31', 'heb')">לא</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ינוח', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "נ", "name": "Nun", "value": 50, "picture": "Seed/fish", "meaning": "Continue, heir, son"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ח", "name": "Chet", "value": 8, "picture": "Wall/fence", "meaning": "Outside, divide, half"}], '74', 'heb')">ינוח</span> <span class="word" lang="he" translate="no" onclick="showWordModal('שבט', [{"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "ט", "name": "Tet", "value": 9, "picture": "Basket/snake", "meaning": "Surround, contain, mud"}], '311', 'heb')">שבט</span> <span class="word" lang="he" translate="no" onclick="showWordModal('הרשע', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}], '575', 'heb')">הרשע</span> <span class="word" lang="he" translate="no" onclick="showWordModal('על', [{"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}], '100', 'heb')">על</span> <span class="word" lang="he" translate="no" onclick="showWordModal('גורל', [{"char": "ג", "name": "Gimel", "value": 3, "picture": "Foot/camel", "meaning": "Walk, gather, carry"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}], '239', 'heb')">גורל</span> <span class="word" lang="he" translate="no" onclick="showWordModal('הצדיקים', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "צ", "name": "Tsade", "value": 90, "picture": "Man on side", "meaning": "Wait, chase, snare"}, {"char": "ד", "name": "Dalet", "value": 4, "picture": "Door", "meaning": "Door, pathway, enter"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ק", "name": "Qoph", "value": 100, "picture": "Sun on horizon", "meaning": "Condense, circle, time"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '259', 'heb')">הצדיקים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('למען', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "מ", "name": "Mem", "value": 40, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ן", "name": "Nun (final)", "value": 700, "picture": "Seed/fish", "meaning": "Continue, heir, son"}], '190', 'heb')">למען</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לאישלחו', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "א", "name": "Aleph", "value": 1, "picture": "Ox head", "meaning": "Strength, leader, first"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ח", "name": "Chet", "value": 8, "picture": "Wall/fence", "meaning": "Outside, divide, half"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}], '385', 'heb')">לאישלחו</span> <span class="word" lang="he" translate="no" onclick="showWordModal('הצדיקים', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "צ", "name": "Tsade", "value": 90, "picture": "Man on side", "meaning": "Wait, chase, snare"}, {"char": "ד", "name": "Dalet", "value": 4, "picture": "Door", "meaning": "Door, pathway, enter"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ק", "name": "Qoph", "value": 100, "picture": "Sun on horizon", "meaning": "Condense, circle, time"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '259', 'heb')">הצדיקים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('בעולתה', [{"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ת", "name": "Tav", "value": 400, "picture": "Crossed sticks", "meaning": "Mark, sign, covenant"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '513', 'heb')">בעולתה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ידיהם', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ד", "name": "Dalet", "value": 4, "picture": "Door", "meaning": "Door, pathway, enter"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '69', 'heb')">ידיהם</span> </div>
+                <div class="translation">aMeaning of verse uncertain. The scepter of the wicked shall never restupon the land allotted to the righteous,that the righteous not set their hand to wrongdoing.</div><div class="word-analysis"><h4>Word-by-Word Analysis</h4><div class="letter-breakdown"><div class="letter-box">
+                        <div class="letter-char">כי</div>
+                        <div class="letter-value">30</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לא</div>
+                        <div class="letter-value">31</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ינוח</div>
+                        <div class="letter-value">74</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">שבט</div>
+                        <div class="letter-value">311</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">הרשע</div>
+                        <div class="letter-value">575</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">על</div>
+                        <div class="letter-value">100</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">גורל</div>
+                        <div class="letter-value">239</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">הצדיקים</div>
+                        <div class="letter-value">259</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">למען</div>
+                        <div class="letter-value">190</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לאישלחו</div>
+                        <div class="letter-value">385</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">הצדיקים</div>
+                        <div class="letter-value">259</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">בעולתה</div>
+                        <div class="letter-value">513</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ידיהם</div>
+                        <div class="letter-value">69</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div></div></div></div>
+            <div class="verse">
+                <div class="verse-ref">Psalms 125:4
+                    <span class="verse-gematria">Gematria: 1240</span>
+                </div>
+                <div class="original-text hebrew" lang="he" translate="no"><span class="word" lang="he" translate="no" onclick="showWordModal('היטיבה', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ט", "name": "Tet", "value": 9, "picture": "Basket/snake", "meaning": "Surround, contain, mud"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '41', 'heb')">היטיבה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('יהוה', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '26', 'heb')">יהוה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('לטובים', [{"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ט", "name": "Tet", "value": 9, "picture": "Basket/snake", "meaning": "Surround, contain, mud"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '97', 'heb')">לטובים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('ולישרים', [{"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '596', 'heb')">ולישרים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('בלבותם', [{"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ב", "name": "Bet", "value": 2, "picture": "House/tent", "meaning": "House, family, inside"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ת", "name": "Tav", "value": 400, "picture": "Crossed sticks", "meaning": "Mark, sign, covenant"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '480', 'heb')">בלבותם</span> </div>
+                <div class="translation">Do good, O ETERNAL One, to the good,to the upright in heart.</div><div class="word-analysis"><h4>Word-by-Word Analysis</h4><div class="letter-breakdown"><div class="letter-box">
+                        <div class="letter-char">היטיבה</div>
+                        <div class="letter-value">41</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">יהוה</div>
+                        <div class="letter-value">26</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">לטובים</div>
+                        <div class="letter-value">97</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">ולישרים</div>
+                        <div class="letter-value">596</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">בלבותם</div>
+                        <div class="letter-value">480</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div></div></div></div>
+            <div class="verse">
+                <div class="verse-ref">Psalms 125:5
+                    <span class="verse-gematria">Gematria: 2778</span>
+                </div>
+                <div class="original-text hebrew" lang="he" translate="no"><span class="word" lang="he" translate="no" onclick="showWordModal('והמטים', [{"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "מ", "name": "Mem", "value": 40, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}, {"char": "ט", "name": "Tet", "value": 9, "picture": "Basket/snake", "meaning": "Surround, contain, mud"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '110', 'heb')">והמטים</span> <span class="word" lang="he" translate="no" onclick="showWordModal('עקלקלותם', [{"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ק", "name": "Qoph", "value": 100, "picture": "Sun on horizon", "meaning": "Condense, circle, time"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ק", "name": "Qoph", "value": 100, "picture": "Sun on horizon", "meaning": "Condense, circle, time"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ת", "name": "Tav", "value": 400, "picture": "Crossed sticks", "meaning": "Mark, sign, covenant"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '776', 'heb')">עקלקלותם</span> <span class="word" lang="he" translate="no" onclick="showWordModal('יוליכם', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "כ", "name": "Kaph", "value": 20, "picture": "Open palm", "meaning": "Open, allow, tame"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '116', 'heb')">יוליכם</span> <span class="word" lang="he" translate="no" onclick="showWordModal('יהוה', [{"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}], '26', 'heb')">יהוה</span> <span class="word" lang="he" translate="no" onclick="showWordModal('אתפעלי', [{"char": "א", "name": "Aleph", "value": 1, "picture": "Ox head", "meaning": "Strength, leader, first"}, {"char": "ת", "name": "Tav", "value": 400, "picture": "Crossed sticks", "meaning": "Mark, sign, covenant"}, {"char": "פ", "name": "Pey", "value": 80, "picture": "Mouth", "meaning": "Speak, open, blow"}, {"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}], '591', 'heb')">אתפעלי</span> <span class="word" lang="he" translate="no" onclick="showWordModal('האון', [{"char": "ה", "name": "Hey", "value": 5, "picture": "Man with raised arms", "meaning": "Behold, reveal, breath"}, {"char": "א", "name": "Aleph", "value": 1, "picture": "Ox head", "meaning": "Strength, leader, first"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ן", "name": "Nun (final)", "value": 700, "picture": "Seed/fish", "meaning": "Continue, heir, son"}], '62', 'heb')">האון</span> <span class="word" lang="he" translate="no" onclick="showWordModal('שלום', [{"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "ו", "name": "Vav", "value": 6, "picture": "Tent peg/nail", "meaning": "Add, secure, hook"}, {"char": "ם", "name": "Mem (final)", "value": 600, "picture": "Water waves", "meaning": "Chaos, mighty, blood"}], '376', 'heb')">שלום</span> <span class="word" lang="he" translate="no" onclick="showWordModal('עלישראלפ', [{"char": "ע", "name": "Ayin", "value": 70, "picture": "Eye", "meaning": "Watch, know, shade"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "י", "name": "Yod", "value": 10, "picture": "Arm/hand", "meaning": "Work, throw, worship"}, {"char": "ש", "name": "Shin", "value": 300, "picture": "Two teeth", "meaning": "Sharp, press, eat, two"}, {"char": "ר", "name": "Resh", "value": 200, "picture": "Head of man", "meaning": "First, top, beginning"}, {"char": "א", "name": "Aleph", "value": 1, "picture": "Ox head", "meaning": "Strength, leader, first"}, {"char": "ל", "name": "Lamed", "value": 30, "picture": "Shepherd staff", "meaning": "Teach, yoke, toward"}, {"char": "פ", "name": "Pey", "value": 80, "picture": "Mouth", "meaning": "Speak, open, blow"}], '721', 'heb')">עלישראלפ</span> </div>
+                <div class="translation">But those who in their crookedness act corruptly,bBut those who in their crookedness act corruptly Meaning of Heb. uncertain. let GOD make them go the way of evildoers.May it be well with Israel!</div><div class="word-analysis"><h4>Word-by-Word Analysis</h4><div class="letter-breakdown"><div class="letter-box">
+                        <div class="letter-char">והמטים</div>
+                        <div class="letter-value">110</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">עקלקלותם</div>
+                        <div class="letter-value">776</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">יוליכם</div>
+                        <div class="letter-value">116</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">יהוה</div>
+                        <div class="letter-value">26</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">אתפעלי</div>
+                        <div class="letter-value">591</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">האון</div>
+                        <div class="letter-value">62</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">שלום</div>
+                        <div class="letter-value">376</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div><div class="letter-box">
+                        <div class="letter-char">עלישראלפ</div>
+                        <div class="letter-value">721</div>
+                        <div class="letter-meaning" style="font-size:8px"></div>
+                    </div></div></div></div><div class="page-nav"><a href="124.html">&larr; Chapter 124</a><a href="126.html">Chapter 126 &rarr;</a></div></div><footer>Mathematical Bible - Complete 7-Level Gematria System</footer>
+
+    <div id="wordModal" class="modal" onclick="if(event.target===this)closeModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalWord"></h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalLang" style="color:#888;font-size:12px;margin-bottom:15px"></div>
+            <div id="letterGrid" class="letter-breakdown"></div>
+            <div class="gematria-box" style="margin-top:20px">
+                <div class="gematria-level">Total Value</div>
+                <div class="gematria-value" id="totalValue"></div>
+            </div>
+        </div>
+    </div>
+    
+<script>
+function showWordModal(word, letters, total, lang) {
+    document.getElementById('modalWord').textContent = word;
+    document.getElementById('modalLang').textContent = lang === 'heb' ? 'Hebrew (Gematria)' : 'Greek (Isopsephy)';
+
+    var grid = document.getElementById('letterGrid');
+    grid.innerHTML = '';
+
+    letters.forEach(function(l) {
+        var box = document.createElement('div');
+        box.className = 'letter-box';
+        box.innerHTML = '<div class="letter-char">' + l.char + '</div>' +
+            '<div class="letter-name">' + l.name + '</div>' +
+            '<div class="letter-value">' + l.value + '</div>' +
+            (l.meaning ? '<div class="letter-meaning">' + l.meaning + '</div>' : '') +
+            (l.picture ? '<div class="letter-meaning">' + l.picture + '</div>' : '');
+        grid.appendChild(box);
+    });
+
+    document.getElementById('totalValue').textContent = total;
+    document.getElementById('wordModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('wordModal').classList.remove('show');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>

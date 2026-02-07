@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta name="description" content="Search Scripture by gematria numeric value. Find verses by Hebrew and Greek numerical values.">
+    <title>Gematria Search - Mathematical Bible</title>
+    <!-- OpenDyslexic font for accessibility -->
+    <link rel="preconnect" href="https://fonts.cdnfonts.com">
+    <style>
+        @font-face {
+            font-family: 'OpenDyslexic';
+            src: url('https://fonts.cdnfonts.com/css/opendyslexic') format('woff2');
+            font-display: swap;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Georgia, serif; background: #f8f6f3; color: #2c2416; line-height: 1.8; }
+
+        /* Accessibility: Dyslexia Mode */
+        body.dyslexia-mode { font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important; letter-spacing: 0.05em; word-spacing: 0.2em; }
+        body.dyslexia-mode * { font-family: inherit !important; }
+
+        /* Accessibility: High Contrast Mode */
+        body.high-contrast { background: #000 !important; color: #fff !important; }
+        body.high-contrast .container { background: #000; }
+        body.high-contrast .search-input { background: #000; color: #fff; border-color: #fff; }
+        body.high-contrast .search-btn { background: #fff; color: #000; }
+        body.high-contrast .result-header { background: #fff; color: #000; }
+        body.high-contrast .sacred-number { background: #000; border-color: #fff; color: #fff; }
+        body.high-contrast a { color: #ff0; }
+
+        /* Accessibility: Large Text Mode */
+        body.large-text { font-size: 1.25em; }
+        body.extra-large-text { font-size: 1.5em; }
+
+        /* Skip Link for Screen Readers */
+        .skip-link { position: absolute; top: -40px; left: 0; background: #1a365d; color: #fff; padding: 8px 16px; z-index: 100; transition: top 0.3s; }
+        .skip-link:focus { top: 0; }
+
+        /* Accessibility Toolbar */
+        .a11y-toolbar { position: fixed; top: 10px; right: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 10px; z-index: 1000; display: flex; gap: 8px; flex-wrap: wrap; max-width: 200px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .a11y-btn { padding: 8px 12px; border: 1px solid #1a365d; background: #fff; color: #1a365d; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .a11y-btn:hover, .a11y-btn.active { background: #1a365d; color: #fff; }
+        .a11y-btn:focus { outline: 3px solid #3b82f6; outline-offset: 2px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        h1 { text-align: center; margin-bottom: 10px; color: #1a365d; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-style: italic; }
+
+        /* Search Box */
+        .search-box { display: flex; gap: 10px; max-width: 600px; margin: 0 auto 30px; }
+        .search-input { flex: 1; padding: 15px 20px; font-size: 24px; border: 2px solid #1a365d;
+            border-radius: 8px; text-align: center; font-family: monospace; }
+        .search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 10px rgba(59,130,246,0.3); }
+        .search-btn { padding: 15px 30px; background: #1a365d; color: white; border: none;
+            border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .search-btn:hover { background: #2d4a7c; }
+
+        /* Results */
+        #results { margin-top: 30px; }
+        .result-header { background: #1a365d; color: white; padding: 15px 20px; border-radius: 8px 8px 0 0; }
+        .result-header h2 { margin: 0; font-size: 20px; }
+        .result-header .count { font-size: 14px; opacity: 0.8; }
+        .result-sacred { background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; margin-bottom: 15px; }
+        .result-sacred h3 { color: #92400e; margin-bottom: 5px; }
+        .result-list { background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;
+            max-height: 500px; overflow-y: auto; }
+        .result-item { padding: 12px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; }
+        .result-item:hover { background: #f0f4f8; }
+        .result-ref { font-weight: bold; color: #1a365d; min-width: 150px; }
+        .result-lang { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+        .result-lang.hebrew { background: #dbeafe; color: #1e40af; }
+        .result-lang.greek { background: #dcfce7; color: #166534; }
+
+        /* Sacred Numbers Grid */
+        .section-header { color: #1a365d; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;
+            margin: 40px 0 20px; border-bottom: 2px solid #1a365d; padding-bottom: 8px; }
+        .sacred-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .sacred-number { background: white; border: 1px solid #ddd; padding: 15px; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s; }
+        .sacred-number:hover { border-color: #1a365d; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .sacred-value { font-size: 28px; font-weight: bold; color: #1a365d; font-family: monospace; }
+        .sacred-name { font-size: 14px; font-weight: 600; color: #333; margin-top: 5px; }
+        .sacred-meaning { font-size: 12px; color: #666; margin-top: 5px; }
+
+        /* Navigation */
+        nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        nav a { color: #1a365d; text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; }
+        nav a:hover { background: #1a365d; color: white; }
+        nav a.oracle-link { background: linear-gradient(135deg, #1a365d 0%, #3b82f6 100%); color: #fff; border: none; }
+        nav a.oracle-link:hover { background: linear-gradient(135deg, #2d4a7c 0%, #60a5fa 100%); }
+
+        /* Oracle Ask Button */
+        .ask-oracle-btn { padding: 8px 16px; background: linear-gradient(135deg, #1a365d 0%, #3b82f6 100%); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: auto; }
+        .ask-oracle-btn:hover { background: linear-gradient(135deg, #2d4a7c 0%, #60a5fa 100%); }
+        .ask-oracle-btn:focus { outline: 3px solid #3b82f6; outline-offset: 2px; }
+
+        footer { text-align: center; padding: 30px; color: #888; font-size: 12px; margin-top: 40px; border-top: 1px solid #ddd; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 40px; color: #666; }
+
+        @media (max-width: 600px) {
+            .search-input { font-size: 18px; padding: 12px; }
+            .sacred-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Link for Screen Readers -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Accessibility Toolbar -->
+    <div class="a11y-toolbar" role="toolbar" aria-label="Accessibility options">
+        <button class="a11y-btn" onclick="toggleDyslexia()" aria-pressed="false" title="Toggle dyslexia-friendly font">Aa</button>
+        <button class="a11y-btn" onclick="toggleContrast()" aria-pressed="false" title="Toggle high contrast">HC</button>
+        <button class="a11y-btn" onclick="toggleFontSize()" aria-pressed="false" title="Increase text size">A+</button>
+    </div>
+
+    <div class="container">
+        <h1 id="main-content" tabindex="-1">Gematria Search Engine</h1>
+        <p class="subtitle">Find verses and words by their numeric value — The feature nobody else has</p>
+
+        <nav role="navigation" aria-label="Mathematical Bible navigation">
+            <a href="index.html">Home</a>
+            <a href="search.html">Search</a>
+            <a href="topics.html">Topics</a>
+            <a href="variants.html">Variants</a>
+            <a href="controversies.html">Controversies</a>
+            <a href="fathers.html">Church Fathers</a>
+            <a href="/oracle" class="oracle-link" title="Ask the Oracle about anything">Ask Oracle</a>
+        </nav>
+
+        <div class="search-box">
+            <input type="number" id="searchValue" class="search-input" placeholder="Enter a number (e.g. 888)"
+                onkeypress="if(event.key==='Enter')searchGematria()">
+            <button class="search-btn" onclick="searchGematria()">Search</button>
+        </div>
+
+        <div id="results"></div>
+
+        <div class="section-header">Sacred Numbers — Click to Search</div>
+        <div class="sacred-grid">
+            
+        <div class="sacred-number" onclick="searchGematria(1)">
+            <div class="sacred-value">1</div>
+            <div class="sacred-name">Echad (One)</div>
+            <div class="sacred-meaning">Unity, God is One</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(7)">
+            <div class="sacred-value">7</div>
+            <div class="sacred-name">Sheva (Seven)</div>
+            <div class="sacred-meaning">Completion, perfection, rest</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(8)">
+            <div class="sacred-value">8</div>
+            <div class="sacred-name">Shemoneh (Eight)</div>
+            <div class="sacred-meaning">New beginnings, resurrection</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(10)">
+            <div class="sacred-value">10</div>
+            <div class="sacred-name">Eser (Ten)</div>
+            <div class="sacred-meaning">Ordinal perfection, law</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(12)">
+            <div class="sacred-value">12</div>
+            <div class="sacred-name">Shnem Asar (Twelve)</div>
+            <div class="sacred-meaning">Governmental perfection</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(13)">
+            <div class="sacred-value">13</div>
+            <div class="sacred-name">Echad + Ahavah</div>
+            <div class="sacred-meaning">Unity and Love both = 13</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(17)">
+            <div class="sacred-value">17</div>
+            <div class="sacred-name">Tov (Good)</div>
+            <div class="sacred-meaning">Goodness, spiritual perfection</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(18)">
+            <div class="sacred-value">18</div>
+            <div class="sacred-name">Chai (Life)</div>
+            <div class="sacred-meaning">Life, living</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(26)">
+            <div class="sacred-value">26</div>
+            <div class="sacred-name">YHWH</div>
+            <div class="sacred-meaning">The Divine Name</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(37)">
+            <div class="sacred-value">37</div>
+            <div class="sacred-name">Yechidah</div>
+            <div class="sacred-meaning">The unique one, singular</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(40)">
+            <div class="sacred-value">40</div>
+            <div class="sacred-name">Mem (Water)</div>
+            <div class="sacred-meaning">Trial, testing, probation</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(42)">
+            <div class="sacred-value">42</div>
+            <div class="sacred-name">Journey stations</div>
+            <div class="sacred-meaning">Israel's 42 journey stations</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(49)">
+            <div class="sacred-value">49</div>
+            <div class="sacred-name">7x7</div>
+            <div class="sacred-meaning">Jubilee preparation</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(50)">
+            <div class="sacred-value">50</div>
+            <div class="sacred-name">Jubilee</div>
+            <div class="sacred-meaning">Freedom, release, Pentecost</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(70)">
+            <div class="sacred-value">70</div>
+            <div class="sacred-name">Ayin</div>
+            <div class="sacred-meaning">Nations, elders, completeness</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(72)">
+            <div class="sacred-value">72</div>
+            <div class="sacred-name">Chesed</div>
+            <div class="sacred-meaning">Loving-kindness</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(86)">
+            <div class="sacred-value">86</div>
+            <div class="sacred-name">Elohim</div>
+            <div class="sacred-meaning">God (plural majesty)</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(91)">
+            <div class="sacred-value">91</div>
+            <div class="sacred-name">YHWH + Adonai</div>
+            <div class="sacred-meaning">26 + 65 = Divine fullness</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(100)">
+            <div class="sacred-value">100</div>
+            <div class="sacred-name">Qoph</div>
+            <div class="sacred-meaning">Holy, consecration</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(111)">
+            <div class="sacred-value">111</div>
+            <div class="sacred-name">Aleph spelled out</div>
+            <div class="sacred-meaning">אלף = 111</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(137)">
+            <div class="sacred-value">137</div>
+            <div class="sacred-name">Kabbalah</div>
+            <div class="sacred-meaning">קבלה = Received tradition</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(216)">
+            <div class="sacred-value">216</div>
+            <div class="sacred-name">Gevurah</div>
+            <div class="sacred-meaning">Strength, judgment (6x6x6)</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(248)">
+            <div class="sacred-value">248</div>
+            <div class="sacred-name">Abraham</div>
+            <div class="sacred-meaning">אברהם = 248 positive commandments</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(314)">
+            <div class="sacred-value">314</div>
+            <div class="sacred-name">Shaddai</div>
+            <div class="sacred-meaning">שדי = Almighty</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(318)">
+            <div class="sacred-value">318</div>
+            <div class="sacred-name">Eliezer</div>
+            <div class="sacred-meaning">Abraham's 318 servants</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(345)">
+            <div class="sacred-value">345</div>
+            <div class="sacred-name">Moshe</div>
+            <div class="sacred-meaning">משה = Moses</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(358)">
+            <div class="sacred-value">358</div>
+            <div class="sacred-name">Mashiach</div>
+            <div class="sacred-meaning">משיח = Messiah</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(400)">
+            <div class="sacred-value">400</div>
+            <div class="sacred-name">Tav</div>
+            <div class="sacred-meaning">Mark, sign, covenant</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(401)">
+            <div class="sacred-value">401</div>
+            <div class="sacred-name">Eth</div>
+            <div class="sacred-meaning">את = Aleph-Tav (First-Last)</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(410)">
+            <div class="sacred-value">410</div>
+            <div class="sacred-name">Shema</div>
+            <div class="sacred-meaning">שמע = Hear</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(434)">
+            <div class="sacred-value">434</div>
+            <div class="sacred-name">Dalet</div>
+            <div class="sacred-meaning">דלת = Door</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(441)">
+            <div class="sacred-value">441</div>
+            <div class="sacred-name">Emet</div>
+            <div class="sacred-meaning">אמת = Truth</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(480)">
+            <div class="sacred-value">480</div>
+            <div class="sacred-name">Talmud</div>
+            <div class="sacred-meaning">תלמוד = Learning</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(541)">
+            <div class="sacred-value">541</div>
+            <div class="sacred-name">Israel</div>
+            <div class="sacred-meaning">ישראל = Israel</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(611)">
+            <div class="sacred-value">611</div>
+            <div class="sacred-name">Torah</div>
+            <div class="sacred-meaning">תורה = Torah/Law</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(620)">
+            <div class="sacred-value">620</div>
+            <div class="sacred-name">Keter</div>
+            <div class="sacred-meaning">כתר = Crown</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(666)">
+            <div class="sacred-value">666</div>
+            <div class="sacred-name">Beast number</div>
+            <div class="sacred-meaning">Revelation 13:18</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(777)">
+            <div class="sacred-value">777</div>
+            <div class="sacred-name">Divine perfection</div>
+            <div class="sacred-meaning">7x111 = Complete perfection</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(888)">
+            <div class="sacred-value">888</div>
+            <div class="sacred-name">Iesous</div>
+            <div class="sacred-meaning">ΙΗΣΟΥΣ = Jesus in Greek</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(1000)">
+            <div class="sacred-value">1000</div>
+            <div class="sacred-name">Eleph</div>
+            <div class="sacred-meaning">Thousand, fullness</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(1480)">
+            <div class="sacred-value">1480</div>
+            <div class="sacred-name">Christos</div>
+            <div class="sacred-meaning">ΧΡΙΣΤΟΣ = Christ</div>
+        </div>
+        <div class="sacred-number" onclick="searchGematria(2368)">
+            <div class="sacred-value">2368</div>
+            <div class="sacred-name">Jesus Christ</div>
+            <div class="sacred-meaning">ΙΗΣΟΥΣ ΧΡΙΣΤΟΣ = 888 + 1480</div>
+        </div>
+        </div>
+    </div>
+
+    <footer>
+        Mathematical Bible — Gematria Search Engine<br>
+        Search 31,143 verses and 400,958 words by numeric value
+    </footer>
+
+    <script>
+        // Pre-loaded sacred numbers data
+        const sacredNumbers = {"1": {"name": "Echad (One)", "meaning": "Unity, God is One", "examples": ["\u05d0 (Aleph)"]}, "7": {"name": "Sheva (Seven)", "meaning": "Completion, perfection, rest", "examples": ["Sabbath"]}, "8": {"name": "Shemoneh (Eight)", "meaning": "New beginnings, resurrection", "examples": ["Circumcision day 8"]}, "10": {"name": "Eser (Ten)", "meaning": "Ordinal perfection, law", "examples": ["Ten Commandments"]}, "12": {"name": "Shnem Asar (Twelve)", "meaning": "Governmental perfection", "examples": ["12 tribes, 12 apostles"]}, "13": {"name": "Echad + Ahavah", "meaning": "Unity and Love both = 13", "examples": ["\u05d0\u05d7\u05d3 = 13, \u05d0\u05d4\u05d1\u05d4 = 13"]}, "17": {"name": "Tov (Good)", "meaning": "Goodness, spiritual perfection", "examples": ["\u05d8\u05d5\u05d1 = 17"]}, "18": {"name": "Chai (Life)", "meaning": "Life, living", "examples": ["\u05d7\u05d9 = 18"]}, "26": {"name": "YHWH", "meaning": "The Divine Name", "examples": ["\u05d9\u05d4\u05d5\u05d4 = 26"]}, "37": {"name": "Yechidah", "meaning": "The unique one, singular", "examples": ["\u05d9\u05d7\u05d9\u05d3\u05d4 = 37"]}, "40": {"name": "Mem (Water)", "meaning": "Trial, testing, probation", "examples": ["40 days flood, 40 years desert"]}, "42": {"name": "Journey stations", "meaning": "Israel's 42 journey stations", "examples": ["Numbers 33"]}, "49": {"name": "7x7", "meaning": "Jubilee preparation", "examples": ["49 years to Jubilee"]}, "50": {"name": "Jubilee", "meaning": "Freedom, release, Pentecost", "examples": ["50th year Jubilee"]}, "70": {"name": "Ayin", "meaning": "Nations, elders, completeness", "examples": ["70 nations, 70 elders"]}, "72": {"name": "Chesed", "meaning": "Loving-kindness", "examples": ["\u05d7\u05e1\u05d3 = 72"]}, "86": {"name": "Elohim", "meaning": "God (plural majesty)", "examples": ["\u05d0\u05dc\u05d4\u05d9\u05dd = 86"]}, "91": {"name": "YHWH + Adonai", "meaning": "26 + 65 = Divine fullness", "examples": ["\u05d9\u05d4\u05d5\u05d4 + \u05d0\u05d3\u05e0\u05d9"]}, "100": {"name": "Qoph", "meaning": "Holy, consecration", "examples": ["\u05e7\u05d3\u05e9 contains \u05e7=100"]}, "111": {"name": "Aleph spelled out", "meaning": "\u05d0\u05dc\u05e3 = 111", "examples": ["Aleph = Ox = Strength"]}, "137": {"name": "Kabbalah", "meaning": "\u05e7\u05d1\u05dc\u05d4 = Received tradition", "examples": ["Mystical tradition"]}, "216": {"name": "Gevurah", "meaning": "Strength, judgment (6x6x6)", "examples": ["\u05d2\u05d1\u05d5\u05e8\u05d4"]}, "248": {"name": "Abraham", "meaning": "\u05d0\u05d1\u05e8\u05d4\u05dd = 248 positive commandments", "examples": ["248 limbs"]}, "314": {"name": "Shaddai", "meaning": "\u05e9\u05d3\u05d9 = Almighty", "examples": ["El Shaddai"]}, "318": {"name": "Eliezer", "meaning": "Abraham's 318 servants", "examples": ["Genesis 14:14"]}, "345": {"name": "Moshe", "meaning": "\u05de\u05e9\u05d4 = Moses", "examples": ["Moses"]}, "358": {"name": "Mashiach", "meaning": "\u05de\u05e9\u05d9\u05d7 = Messiah", "examples": ["The Anointed One"]}, "400": {"name": "Tav", "meaning": "Mark, sign, covenant", "examples": ["Last Hebrew letter"]}, "401": {"name": "Eth", "meaning": "\u05d0\u05ea = Aleph-Tav (First-Last)", "examples": ["Genesis 1:1 \u05d0\u05ea"]}, "410": {"name": "Shema", "meaning": "\u05e9\u05de\u05e2 = Hear", "examples": ["Shema Israel"]}, "434": {"name": "Dalet", "meaning": "\u05d3\u05dc\u05ea = Door", "examples": ["Door spelled out"]}, "441": {"name": "Emet", "meaning": "\u05d0\u05de\u05ea = Truth", "examples": ["Truth"]}, "480": {"name": "Talmud", "meaning": "\u05ea\u05dc\u05de\u05d5\u05d3 = Learning", "examples": ["Study"]}, "541": {"name": "Israel", "meaning": "\u05d9\u05e9\u05e8\u05d0\u05dc = Israel", "examples": ["The nation"]}, "611": {"name": "Torah", "meaning": "\u05ea\u05d5\u05e8\u05d4 = Torah/Law", "examples": ["The Teaching"]}, "620": {"name": "Keter", "meaning": "\u05db\u05ea\u05e8 = Crown", "examples": ["Highest Sefirah"]}, "666": {"name": "Beast number", "meaning": "Revelation 13:18", "examples": ["Number of man"]}, "777": {"name": "Divine perfection", "meaning": "7x111 = Complete perfection", "examples": ["Lamech lived 777 years"]}, "888": {"name": "Iesous", "meaning": "\u0399\u0397\u03a3\u039f\u03a5\u03a3 = Jesus in Greek", "examples": ["Jesus = 888"]}, "1000": {"name": "Eleph", "meaning": "Thousand, fullness", "examples": ["Millennium"]}, "1480": {"name": "Christos", "meaning": "\u03a7\u03a1\u0399\u03a3\u03a4\u039f\u03a3 = Christ", "examples": ["The Anointed"]}, "2368": {"name": "Jesus Christ", "meaning": "\u0399\u0397\u03a3\u039f\u03a5\u03a3 \u03a7\u03a1\u0399\u03a3\u03a4\u039f\u03a3 = 888 + 1480", "examples": ["Full title"]}};
+
+        // Verse index (loaded on demand)
+        let verseIndex = null;
+
+        async function loadIndex() {
+            if (verseIndex) return verseIndex;
+            const response = await fetch('data/gematria_verse_index.json');
+            verseIndex = await response.json();
+            return verseIndex;
+        }
+
+        async function searchGematria(value) {
+            const searchVal = value || document.getElementById('searchValue').value;
+            if (!searchVal) return;
+
+            document.getElementById('results').innerHTML = '<div class="loading">Searching...</div>';
+
+            try {
+                const index = await loadIndex();
+                const results = index.index[searchVal] || [];
+                const sacred = sacredNumbers[searchVal];
+
+                let html = `
+                    <div class="result-header" style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <h2>Results for ${searchVal}</h2>
+                            <div class="count">${results.length} verse(s) found</div>
+                        </div>
+                        <button class="ask-oracle-btn" onclick="askOracleAboutGematria(${searchVal})" title="Ask the Oracle about the significance of ${searchVal}">
+                            Ask Oracle About ${searchVal}
+                        </button>
+                    </div>`;
+
+                if (sacred) {
+                    html += `
+                        <div class="result-sacred">
+                            <h3>${sacred.name}</h3>
+                            <p>${sacred.meaning}</p>
+                            <p><small>Examples: ${sacred.examples.join(', ')}</small></p>
+                        </div>`;
+                }
+
+                html += '<div class="result-list">';
+
+                if (results.length === 0) {
+                    html += '<div class="result-item">No verses found with this exact value.</div>';
+                } else {
+                    for (const r of results.slice(0, 100)) {
+                        const langClass = r.lang === 'hebrew' ? 'hebrew' : 'greek';
+                        const langLabel = r.lang === 'hebrew' ? 'Hebrew' : 'Greek';
+                        const bookSlug = r.book.toLowerCase().replace(/ /g, '_').replace(/[^a-z0-9_]/g, '');
+                        const parts = r.ref.split(' ');
+                        const chVerse = parts[parts.length - 1].split(':');
+                        const link = `${bookSlug}/${chVerse[0]}.html`;
+
+                        html += `
+                            <a href="${link}" class="result-item" style="text-decoration:none;color:inherit">
+                                <span class="result-ref">${r.ref}</span>
+                                <span class="result-lang ${langClass}">${langLabel}</span>
+                            </a>`;
+                    }
+
+                    if (results.length > 100) {
+                        html += `<div class="result-item" style="color:#666;font-style:italic">
+                            Showing first 100 of ${results.length} results</div>`;
+                    }
+                }
+
+                html += '</div>';
+                document.getElementById('results').innerHTML = html;
+
+            } catch (err) {
+                document.getElementById('results').innerHTML = `<div class="loading">Error loading index. Please try again.</div>`;
+                console.error(err);
+            }
+        }
+
+        // ============================================
+        // ACCESSIBILITY FUNCTIONS
+        // ============================================
+
+        // Dyslexia-friendly mode toggle
+        function toggleDyslexia() {
+            document.body.classList.toggle('dyslexia-mode');
+            const btn = document.querySelector('.a11y-btn[onclick="toggleDyslexia()"]');
+            const isActive = document.body.classList.contains('dyslexia-mode');
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive);
+            localStorage.setItem('bible-dyslexia', isActive);
+        }
+
+        // High contrast mode toggle
+        function toggleContrast() {
+            document.body.classList.toggle('high-contrast');
+            const btn = document.querySelector('.a11y-btn[onclick="toggleContrast()"]');
+            const isActive = document.body.classList.contains('high-contrast');
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive);
+            localStorage.setItem('bible-contrast', isActive);
+        }
+
+        // Font size toggle (cycles through: normal -> large -> extra-large -> normal)
+        function toggleFontSize() {
+            const body = document.body;
+            if (body.classList.contains('extra-large-text')) {
+                body.classList.remove('extra-large-text');
+                localStorage.setItem('bible-fontsize', 'normal');
+            } else if (body.classList.contains('large-text')) {
+                body.classList.remove('large-text');
+                body.classList.add('extra-large-text');
+                localStorage.setItem('bible-fontsize', 'extra-large');
+            } else {
+                body.classList.add('large-text');
+                localStorage.setItem('bible-fontsize', 'large');
+            }
+        }
+
+        // Load saved accessibility preferences
+        function loadA11yPreferences() {
+            if (localStorage.getItem('bible-dyslexia') === 'true') {
+                document.body.classList.add('dyslexia-mode');
+                const btn = document.querySelector('.a11y-btn[onclick="toggleDyslexia()"]');
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
+            }
+            if (localStorage.getItem('bible-contrast') === 'true') {
+                document.body.classList.add('high-contrast');
+                const btn = document.querySelector('.a11y-btn[onclick="toggleContrast()"]');
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
+            }
+            const fontSize = localStorage.getItem('bible-fontsize');
+            if (fontSize === 'large') document.body.classList.add('large-text');
+            if (fontSize === 'extra-large') document.body.classList.add('extra-large-text');
+        }
+
+        // Initialize accessibility on page load
+        document.addEventListener('DOMContentLoaded', loadA11yPreferences);
+
+        // Register Service Worker for offline access
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(reg => console.log('[Bible] Service Worker registered'))
+                .catch(err => console.log('[Bible] SW registration failed:', err));
+        }
+
+        // ============================================
+        // ORACLE INTEGRATION
+        // ============================================
+
+        // Ask the Oracle about a specific gematria value
+        function askOracleAboutGematria(value) {
+            const sacred = sacredNumbers[value];
+            let question = `What is the biblical significance of the gematria value ${value}?`;
+
+            if (sacred) {
+                question = `Explain the gematria significance of ${value} (${sacred.name}). ${sacred.meaning}. What verses and concepts relate to this number?`;
+            }
+
+            // Redirect to Oracle with pre-filled question
+            const encodedQuestion = encodeURIComponent(question);
+            window.location.href = `/oracle?q=${encodedQuestion}`;
+        }
+
+        // Ask the Oracle about a specific verse
+        function askOracleAboutVerse(reference) {
+            const question = `Explain ${reference} in depth. Include the Hebrew/Greek meaning, gematria significance, cross-references, and theological context.`;
+            const encodedQuestion = encodeURIComponent(question);
+            window.location.href = `/oracle?q=${encodedQuestion}`;
+        }
+    </script>
+<!-- Oracle Helper -->
+<script src="oracle-helper.js"></script>
+</body>
+</html>

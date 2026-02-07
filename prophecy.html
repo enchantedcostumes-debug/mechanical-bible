@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prophecy Fulfillment Tracker - Mathematical Bible</title>
+    <link rel="stylesheet" href="/static/css/quantum-theme.css">
+    <style>
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e8e8e8; font-family: 'Segoe UI', sans-serif; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { color: #ffd700; text-align: center; font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .stats { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+        .stat-box { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 15px 25px; border-radius: 10px; text-align: center; }
+        .stat-value { font-size: 2rem; color: #ffd700; font-weight: bold; }
+        .stat-label { color: #888; font-size: 0.9rem; }
+        .category-nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
+        .cat-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e8e8e8; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+        .cat-btn:hover, .cat-btn.active { background: rgba(255,215,0,0.3); border-color: #ffd700; color: #ffd700; }
+        .category-section { margin-bottom: 40px; }
+        .category-title { color: #ffd700; font-size: 1.5rem; border-bottom: 2px solid rgba(255,215,0,0.3); padding-bottom: 10px; margin-bottom: 20px; }
+        .prophecy-grid { display: grid; gap: 20px; }
+        .prophecy-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; transition: all 0.3s; }
+        .prophecy-card:hover { border-color: rgba(255,215,0,0.5); transform: translateY(-2px); }
+        .prophecy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .prophecy-title { font-size: 1.2rem; color: #fff; font-weight: bold; }
+        .confidence-badge { background: linear-gradient(135deg, #4CAF50, #45a049); padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: bold; }
+        .confidence-high { background: linear-gradient(135deg, #4CAF50, #45a049); }
+        .confidence-medium { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .type-badge { background: rgba(255,215,0,0.2); color: #ffd700; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; margin-left: 10px; }
+        .scripture-box { background: rgba(0,0,0,0.3); border-left: 4px solid; padding: 15px; margin: 10px 0; border-radius: 0 10px 10px 0; }
+        .ot-box { border-color: #4a90d9; }
+        .nt-box { border-color: #d94a4a; }
+        .scripture-ref { font-weight: bold; color: #ffd700; margin-bottom: 8px; }
+        .scripture-text { font-style: italic; line-height: 1.6; color: #ccc; }
+        .fulfilled-by { margin-top: 15px; padding: 10px; background: rgba(255,215,0,0.1); border-radius: 8px; }
+        .fulfilled-label { color: #888; font-size: 0.85rem; }
+        .fulfilled-value { color: #ffd700; font-weight: bold; }
+        .oracle-btn { display: inline-block; margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 0.85rem; transition: all 0.3s; }
+        .oracle-btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+        .nav-links { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-links a { color: #888; text-decoration: none; padding: 5px 10px; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover { color: #ffd700; background: rgba(255,215,0,0.1); }
+        @media (max-width: 768px) { .prophecy-header { flex-direction: column; align-items: flex-start; gap: 10px; } .stats { flex-direction: column; align-items: center; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-links">
+            <a href="/static/mathematical-bible/">Home</a>
+            <a href="/static/mathematical-bible/search.html">Gematria</a>
+            <a href="/static/mathematical-bible/red-letter.html">Red Letter</a>
+            <a href="/static/mathematical-bible/tsk.html">Cross-Refs</a>
+            <a href="/static/mathematical-bible/naves.html">Nave's</a>
+            <a href="/static/mathematical-bible/variants.html">Manuscripts</a>
+            <a href="/static/mathematical-bible/fathers.html">Fathers</a>
+            <a href="/static/mathematical-bible/cantillation.html">Cantillation</a>
+            <a href="/static/mathematical-bible/frequency.html">Word Stats</a>
+            <a href="/oracle">Oracle</a>
+        </nav>
+
+        <h1>Prophecy Fulfillment Tracker</h1>
+        <p class="subtitle">OT Predictions → NT Fulfillments with Confidence Scores</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value">40</div>
+                <div class="stat-label">Total Prophecies</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">98.9%</div>
+                <div class="stat-label">Avg Confidence</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">38</div>
+                <div class="stat-label">Messianic</div>
+            </div>
+        </div>
+
+        <div class="category-nav">
+            <button class="cat-btn" onclick="scrollToCategory('birth-and-early-life')">Birth and Early Life (6)</button>
+            <button class="cat-btn" onclick="scrollToCategory('ministry-and-nature')">Ministry and Nature (7)</button>
+            <button class="cat-btn" onclick="scrollToCategory('triumphal-entry')">Triumphal Entry (2)</button>
+            <button class="cat-btn" onclick="scrollToCategory('betrayal-and-arrest')">Betrayal and Arrest (5)</button>
+            <button class="cat-btn" onclick="scrollToCategory('suffering-and-crucifixion')">Suffering and Crucifixion (12)</button>
+            <button class="cat-btn" onclick="scrollToCategory('burial-and-resurrection')">Burial and Resurrection (4)</button>
+            <button class="cat-btn" onclick="scrollToCategory('rejection-and-suffering-servant')">Rejection and Suffering Servant (4)</button>
+        </div>
+
+        <div class="category-section" id="birth-and-early-life">
+            <h2 class="category-title">Birth and Early Life</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Born of a Virgin<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">98% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 7:14</div>
+                        <div class="scripture-text">"Therefore the Lord himself shall give you a sign; Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 1:22-23</div>
+                        <div class="scripture-text">"Now all this was done, that it might be fulfilled which was spoken of the Lord by the prophet, saying, Behold, a virgin shall be with child, and shall bring forth a son, and they shall call his name Emmanuel."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%207:14%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Born in Bethlehem<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Micah 5:2</div>
+                        <div class="scripture-text">"But thou, Bethlehem Ephratah, though thou be little among the thousands of Judah, yet out of thee shall he come forth unto me that is to be ruler in Israel; whose goings forth have been from of old, from everlasting."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 2:1</div>
+                        <div class="scripture-text">"Now when Jesus was born in Bethlehem of Judaea in the days of Herod the king, behold, there came wise men from the east to Jerusalem."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Micah%205:2%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Called Out of Egypt<span class="type-badge">Typological</span></span>
+                        <span class="confidence-badge confidence-high">95% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Hosea 11:1</div>
+                        <div class="scripture-text">"When Israel was a child, then I loved him, and called my son out of Egypt."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 2:15</div>
+                        <div class="scripture-text">"And was there until the death of Herod: that it might be fulfilled which was spoken of the Lord by the prophet, saying, Out of Egypt have I called my son."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Hosea%2011:1%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Massacre of Infants<span class="type-badge">Typological</span></span>
+                        <span class="confidence-badge confidence-medium">90% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Jeremiah 31:15</div>
+                        <div class="scripture-text">"Thus saith the LORD; A voice was heard in Ramah, lamentation, and bitter weeping; Rahel weeping for her children refused to be comforted for her children, because they were not."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 2:16-18</div>
+                        <div class="scripture-text">"Then Herod, when he saw that he was mocked of the wise men, was exceeding wroth, and sent forth, and slew all the children that were in Bethlehem."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Herod's decree</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Jeremiah%2031:15%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">From the Line of David<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 11:1</div>
+                        <div class="scripture-text">"And there shall come forth a rod out of the stem of Jesse, and a Branch shall grow out of his roots."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 1:6</div>
+                        <div class="scripture-text">"And Jesse begat David the king; and David the king begat Solomon."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ's genealogy</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2011:1%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Born of the Seed of Abraham<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Genesis 22:18</div>
+                        <div class="scripture-text">"And in thy seed shall all the nations of the earth be blessed; because thou hast obeyed my voice."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Galatians 3:16</div>
+                        <div class="scripture-text">"Now to Abraham and his seed were the promises made. He saith not, And to seeds, as of many; but as of one, And to thy seed, which is Christ."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Genesis%2022:18%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section" id="ministry-and-nature">
+            <h2 class="category-title">Ministry and Nature</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Preceded by a Messenger<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Malachi 3:1</div>
+                        <div class="scripture-text">"Behold, I will send my messenger, and he shall prepare the way before me."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 11:10</div>
+                        <div class="scripture-text">"For this is he, of whom it is written, Behold, I send my messenger before thy face, which shall prepare thy way before thee."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">John the Baptist</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Malachi%203:1%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Voice Crying in the Wilderness<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 40:3</div>
+                        <div class="scripture-text">"The voice of him that crieth in the wilderness, Prepare ye the way of the LORD, make straight in the desert a highway for our God."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 3:3</div>
+                        <div class="scripture-text">"For this is he that was spoken of by the prophet Esaias, saying, The voice of one crying in the wilderness, Prepare ye the way of the Lord, make his paths straight."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">John the Baptist</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2040:3%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Ministry in Galilee<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">98% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 9:1-2</div>
+                        <div class="scripture-text">"Nevertheless the dimness shall not be such as was in her vexation, when at the first he lightly afflicted the land of Zebulun and the land of Naphtali, and afterward did more grievously afflict her by the way of the sea, beyond Jordan, in Galilee of the nations. The people that walked in darkness have seen a great light."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 4:13-16</div>
+                        <div class="scripture-text">"And leaving Nazareth, he came and dwelt in Capernaum, which is upon the sea coast, in the borders of Zabulon and Nephthalim: That it might be fulfilled which was spoken by Esaias the prophet."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%209:1-2%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Prophet Like Moses<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Deuteronomy 18:15</div>
+                        <div class="scripture-text">"The LORD thy God will raise up unto thee a Prophet from the midst of thee, of thy brethren, like unto me; unto him ye shall hearken."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Acts 3:22-23</div>
+                        <div class="scripture-text">"For Moses truly said unto the fathers, A prophet shall the Lord your God raise up unto you of your brethren, like unto me; him shall ye hear in all things whatsoever he shall say unto you."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Deuteronomy%2018:15%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Teaching in Parables<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">95% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 78:2</div>
+                        <div class="scripture-text">"I will open my mouth in a parable: I will utter dark sayings of old."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 13:34-35</div>
+                        <div class="scripture-text">"All these things spake Jesus unto the multitude in parables; and without a parable spake he not unto them: That it might be fulfilled which was spoken by the prophet, saying, I will open my mouth in parables."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2078:2%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Priest After Order of Melchizedek<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 110:4</div>
+                        <div class="scripture-text">"The LORD hath sworn, and will not repent, Thou art a priest for ever after the order of Melchizedek."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Hebrews 5:5-6</div>
+                        <div class="scripture-text">"So also Christ glorified not himself to be made an high priest; but he that said unto him, Thou art my Son, to day have I begotten thee. As he saith also in another place, Thou art a priest for ever after the order of Melchisedec."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%20110:4%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Healing Ministry<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 35:5-6</div>
+                        <div class="scripture-text">"Then the eyes of the blind shall be opened, and the ears of the deaf shall be unstopped. Then shall the lame man leap as an hart, and the tongue of the dumb sing."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 11:4-5</div>
+                        <div class="scripture-text">"Jesus answered and said unto them, Go and shew John again those things which ye do hear and see: The blind receive their sight, and the lame walk, the lepers are cleansed, and the deaf hear, the dead are raised up."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ's miracles</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2035:5-6%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section" id="triumphal-entry">
+            <h2 class="category-title">Triumphal Entry</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Entering Jerusalem on a Donkey<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Zechariah 9:9</div>
+                        <div class="scripture-text">"Rejoice greatly, O daughter of Zion; shout, O daughter of Jerusalem: behold, thy King cometh unto thee: he is just, and having salvation; lowly, and riding upon an ass, and upon a colt the foal of an ass."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 21:4-5</div>
+                        <div class="scripture-text">"All this was done, that it might be fulfilled which was spoken by the prophet, saying, Tell ye the daughter of Sion, Behold, thy King cometh unto thee, meek, and sitting upon an ass, and a colt the foal of an ass."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Zechariah%209:9%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Praised by Children<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">95% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 8:2</div>
+                        <div class="scripture-text">"Out of the mouth of babes and sucklings hast thou ordained strength because of thine enemies, that thou mightest still the enemy and the avenger."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 21:16</div>
+                        <div class="scripture-text">"And said unto him, Hearest thou what these say? And Jesus saith unto them, Yea; have ye never read, Out of the mouth of babes and sucklings thou hast perfected praise?"</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Children in temple</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%208:2%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section" id="betrayal-and-arrest">
+            <h2 class="category-title">Betrayal and Arrest</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Betrayed by a Friend<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 41:9</div>
+                        <div class="scripture-text">"Yea, mine own familiar friend, in whom I trusted, which did eat of my bread, hath lifted up his heel against me."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 13:18</div>
+                        <div class="scripture-text">"I speak not of you all: I know whom I have chosen: but that the scripture may be fulfilled, He that eateth bread with me hath lifted up his heel against me."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Judas Iscariot</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2041:9%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Sold for Thirty Pieces of Silver<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Zechariah 11:12</div>
+                        <div class="scripture-text">"And I said unto them, If ye think good, give me my price; and if not, forbear. So they weighed for my price thirty pieces of silver."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 26:15</div>
+                        <div class="scripture-text">"And said unto them, What will ye give me, and I will deliver him unto you? And they covenanted with him for thirty pieces of silver."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Judas's payment</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Zechariah%2011:12%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Money Cast to the Potter<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Zechariah 11:13</div>
+                        <div class="scripture-text">"And the LORD said unto me, Cast it unto the potter: a goodly price that I was prised at of them. And I took the thirty pieces of silver, and cast them to the potter in the house of the LORD."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:5-7</div>
+                        <div class="scripture-text">"And he cast down the pieces of silver in the temple, and departed, and went and hanged himself. And the chief priests took the silver pieces... and bought with them the potter's field."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Potter's field purchase</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Zechariah%2011:13%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Disciples Scattered<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Zechariah 13:7</div>
+                        <div class="scripture-text">"Awake, O sword, against my shepherd, and against the man that is my fellow, saith the LORD of hosts: smite the shepherd, and the sheep shall be scattered."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 26:31</div>
+                        <div class="scripture-text">"Then saith Jesus unto them, All ye shall be offended because of me this night: for it is written, I will smite the shepherd, and the sheep of the flock shall be scattered abroad."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Disciples fleeing</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Zechariah%2013:7%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Accused by False Witnesses<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">95% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 35:11</div>
+                        <div class="scripture-text">"False witnesses did rise up; they laid to my charge things that I knew not."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 26:59-60</div>
+                        <div class="scripture-text">"Now the chief priests, and elders, and all the council, sought false witness against Jesus, to put him to death; But found none: yea, though many false witnesses came."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Trial of Jesus</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2035:11%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section" id="suffering-and-crucifixion">
+            <h2 class="category-title">Suffering and Crucifixion</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Silent Before Accusers<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 53:7</div>
+                        <div class="scripture-text">"He was oppressed, and he was afflicted, yet he opened not his mouth: he is brought as a lamb to the slaughter, and as a sheep before her shearers is dumb, so he openeth not his mouth."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:12-14</div>
+                        <div class="scripture-text">"And when he was accused of the chief priests and elders, he answered nothing. Then said Pilate unto him, Hearest thou not how many things they witness against thee? And he answered him to never a word."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2053:7%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Wounded and Bruised<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 53:5</div>
+                        <div class="scripture-text">"But he was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: 1 Peter 2:24</div>
+                        <div class="scripture-text">"Who his own self bare our sins in his own body on the tree, that we, being dead to sins, should live unto righteousness: by whose stripes ye were healed."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2053:5%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Smitten and Spat Upon<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 50:6</div>
+                        <div class="scripture-text">"I gave my back to the smiters, and my cheeks to them that plucked off the hair: I hid not my face from shame and spitting."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 26:67</div>
+                        <div class="scripture-text">"Then did they spit in his face, and buffeted him; and others smote him with the palms of their hands."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2050:6%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Mocked and Ridiculed<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 22:7-8</div>
+                        <div class="scripture-text">"All they that see me laugh me to scorn: they shoot out the lip, they shake the head, saying, He trusted on the LORD that he would deliver him: let him deliver him, seeing he delighted in him."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:39-43</div>
+                        <div class="scripture-text">"And they that passed by reviled him, wagging their heads... He trusted in God; let him deliver him now, if he will have him."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Mockers at cross</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2022:7-8%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Hands and Feet Pierced<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 22:16</div>
+                        <div class="scripture-text">"For dogs have compassed me: the assembly of the wicked have inclosed me: they pierced my hands and my feet."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 20:25-27</div>
+                        <div class="scripture-text">"The other disciples therefore said unto him, We have seen the Lord. But he said unto them, Except I shall see in his hands the print of the nails... Reach hither thy hand, and thrust it into my side."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Crucifixion</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2022:16%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Crucified with Thieves<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 53:12</div>
+                        <div class="scripture-text">"Therefore will I divide him a portion with the great, and he shall divide the spoil with the strong; because he hath poured out his soul unto death: and he was numbered with the transgressors."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:38</div>
+                        <div class="scripture-text">"Then were there two thieves crucified with him, one on the right hand, and another on the left."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Two criminals</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2053:12%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Given Vinegar and Gall<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 69:21</div>
+                        <div class="scripture-text">"They gave me also gall for my meat; and in my thirst they gave me vinegar to drink."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:34</div>
+                        <div class="scripture-text">"They gave him vinegar to drink mingled with gall: and when he had tasted thereof, he would not drink."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Soldiers' offer</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2069:21%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Garments Divided by Lots<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 22:18</div>
+                        <div class="scripture-text">"They part my garments among them, and cast lots upon my vesture."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 19:23-24</div>
+                        <div class="scripture-text">"Then the soldiers, when they had crucified Jesus, took his garments, and made four parts, to every soldier a part... They said therefore among themselves, Let us not rend it, but cast lots for it."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Roman soldiers</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2022:18%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Forsaken Cry<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 22:1</div>
+                        <div class="scripture-text">"My God, my God, why hast thou forsaken me? why art thou so far from helping me, and from the words of my roaring?"</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:46</div>
+                        <div class="scripture-text">"And about the ninth hour Jesus cried with a loud voice, saying, Eli, Eli, lama sabachthani? that is to say, My God, my God, why hast thou forsaken me?"</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2022:1%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">No Bones Broken<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 34:20</div>
+                        <div class="scripture-text">"He keepeth all his bones: not one of them is broken."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 19:33-36</div>
+                        <div class="scripture-text">"But when they came to Jesus, and saw that he was dead already, they brake not his legs... For these things were done, that the scripture should be fulfilled, A bone of him shall not be broken."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Roman soldiers sparing legs</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2034:20%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Side Pierced<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Zechariah 12:10</div>
+                        <div class="scripture-text">"And I will pour upon the house of David, and upon the inhabitants of Jerusalem, the spirit of grace and of supplications: and they shall look upon me whom they have pierced."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 19:34-37</div>
+                        <div class="scripture-text">"But one of the soldiers with a spear pierced his side, and forthwith came there out blood and water... that the scripture should be fulfilled... They shall look on him whom they pierced."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Soldier's spear</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Zechariah%2012:10%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Darkness Over the Land<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-medium">90% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Amos 8:9</div>
+                        <div class="scripture-text">"And it shall come to pass in that day, saith the Lord GOD, that I will cause the sun to go down at noon, and I will darken the earth in the clear day."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:45</div>
+                        <div class="scripture-text">"Now from the sixth hour there was darkness over all the land unto the ninth hour."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Darkness at crucifixion</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Amos%208:9%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section" id="burial-and-resurrection">
+            <h2 class="category-title">Burial and Resurrection</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Buried with the Rich<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 53:9</div>
+                        <div class="scripture-text">"And he made his grave with the wicked, and with the rich in his death; because he had done no violence, neither was any deceit in his mouth."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 27:57-60</div>
+                        <div class="scripture-text">"When the even was come, there came a rich man of Arimathaea, named Joseph... and laid it in his own new tomb, which he had hewn out in the rock."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Joseph of Arimathea</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2053:9%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Resurrection<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 16:10</div>
+                        <div class="scripture-text">"For thou wilt not leave my soul in hell; neither wilt thou suffer thine Holy One to see corruption."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Acts 2:31</div>
+                        <div class="scripture-text">"He seeing this before spake of the resurrection of Christ, that his soul was not left in hell, neither his flesh did see corruption."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ rising</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2016:10%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Ascension<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 68:18</div>
+                        <div class="scripture-text">"Thou hast ascended on high, thou hast led captivity captive: thou hast received gifts for men."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Ephesians 4:8</div>
+                        <div class="scripture-text">"Wherefore he saith, When he ascended up on high, he led captivity captive, and gave gifts unto men."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ's ascension</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2068:18%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Seated at Right Hand of God<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 110:1</div>
+                        <div class="scripture-text">"The LORD said unto my Lord, Sit thou at my right hand, until I make thine enemies thy footstool."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Hebrews 1:3</div>
+                        <div class="scripture-text">"Who being the brightness of his glory, and the express image of his person, and upholding all things by the word of his power, when he had by himself purged our sins, sat down on the right hand of the Majesty on high."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%20110:1%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-section" id="rejection-and-suffering-servant">
+            <h2 class="category-title">Rejection and Suffering Servant</h2>
+            <div class="prophecy-grid">
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Rejected by His Own<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 53:3</div>
+                        <div class="scripture-text">"He is despised and rejected of men; a man of sorrows, and acquainted with grief: and we hid as it were our faces from him; he was despised, and we esteemed him not."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 1:11</div>
+                        <div class="scripture-text">"He came unto his own, and his own received him not."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jewish rejection</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2053:3%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Stone Rejected by Builders<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 118:22</div>
+                        <div class="scripture-text">"The stone which the builders refused is become the head stone of the corner."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: Matthew 21:42</div>
+                        <div class="scripture-text">"Jesus saith unto them, Did ye never read in the scriptures, The stone which the builders rejected, the same is become the head of the corner."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%20118:22%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Hated Without a Cause<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Psalm 69:4</div>
+                        <div class="scripture-text">"They that hate me without a cause are more than the hairs of mine head."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: John 15:25</div>
+                        <div class="scripture-text">"But this cometh to pass, that the word might be fulfilled that is written in their law, They hated me without a cause."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Psalm%2069:4%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+                <div class="prophecy-card">
+                    <div class="prophecy-header">
+                        <span class="prophecy-title">Bore Our Sins<span class="type-badge">Messianic</span></span>
+                        <span class="confidence-badge confidence-high">100% Confidence</span>
+                    </div>
+
+                    <div class="scripture-box ot-box">
+                        <div class="scripture-ref">OT: Isaiah 53:6</div>
+                        <div class="scripture-text">"All we like sheep have gone astray; we have turned every one to his own way; and the LORD hath laid on him the iniquity of us all."</div>
+                    </div>
+
+                    <div class="scripture-box nt-box">
+                        <div class="scripture-ref">NT: 1 Peter 2:24</div>
+                        <div class="scripture-text">"Who his own self bare our sins in his own body on the tree, that we, being dead to sins, should live unto righteousness."</div>
+                    </div>
+
+                    <div class="fulfilled-by">
+                        <span class="fulfilled-label">Fulfilled by:</span>
+                        <span class="fulfilled-value">Jesus Christ</span>
+                    </div>
+
+                    <a href="/oracle?q=Explain%20the%20prophecy%20Isaiah%2053:6%20and%20its%20fulfillment" class="oracle-btn">Ask Oracle About This Prophecy</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function scrollToCategory(catId) {
+                document.getElementById(catId).scrollIntoView({ behavior: 'smooth' });
+                // Update active button
+                document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        </script>
+    </div>
+<!-- Oracle Helper -->
+<script src="oracle-helper.js"></script>
+</body>
+</html>

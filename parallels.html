@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallel Passages - Synoptic Gospels</title>
+    <link rel="stylesheet" href="/static/css/quantum-theme.css">
+    <style>
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e8e8e8; font-family: 'Segoe UI', sans-serif; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #ffd700; text-align: center; font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .stats { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+        .stat-box { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); padding: 15px 25px; border-radius: 10px; text-align: center; }
+        .stat-value { font-size: 2rem; color: #ffd700; font-weight: bold; }
+        .stat-label { color: #888; font-size: 0.9rem; }
+        .category-nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
+        .cat-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e8e8e8; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+        .cat-btn:hover, .cat-btn.active { background: rgba(255,215,0,0.3); border-color: #ffd700; color: #ffd700; }
+        .category-section { margin-bottom: 40px; }
+        .category-title { color: #ffd700; font-size: 1.5rem; border-bottom: 2px solid rgba(255,215,0,0.3); padding-bottom: 10px; margin-bottom: 20px; }
+        .passage-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .passage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .passage-title { font-size: 1.3rem; color: #fff; font-weight: bold; }
+        .gospel-count { background: rgba(255,215,0,0.2); color: #ffd700; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; }
+        .gospel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+        @media (max-width: 1200px) { .gospel-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .gospel-grid { grid-template-columns: 1fr; } }
+        .gospel-box { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 15px; min-height: 100px; }
+        .gospel-box.empty { opacity: 0.4; }
+        .gospel-name { font-weight: bold; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 2px solid; }
+        .matthew .gospel-name { color: #4a90d9; border-color: #4a90d9; }
+        .mark .gospel-name { color: #d94a4a; border-color: #d94a4a; }
+        .luke .gospel-name { color: #4ad94a; border-color: #4ad94a; }
+        .john .gospel-name { color: #d9d94a; border-color: #d9d94a; }
+        .gospel-ref { font-weight: bold; color: #ffd700; margin-bottom: 5px; }
+        .gospel-summary { font-size: 0.9rem; color: #ccc; line-height: 1.5; }
+        .not-in { color: #666; font-style: italic; }
+        .notes-box { background: rgba(255,215,0,0.1); border-left: 3px solid #ffd700; padding: 10px 15px; margin-top: 15px; border-radius: 0 8px 8px 0; }
+        .notes-label { color: #ffd700; font-weight: bold; font-size: 0.85rem; }
+        .notes-text { color: #ccc; font-size: 0.9rem; }
+        .oracle-btn { display: inline-block; margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 0.85rem; transition: all 0.3s; }
+        .oracle-btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+        .nav-links { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-links a { color: #888; text-decoration: none; padding: 5px 10px; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover { color: #ffd700; background: rgba(255,215,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-links">
+            <a href="/static/mathematical-bible/">Home</a>
+            <a href="/static/mathematical-bible/search.html">Gematria</a>
+            <a href="/static/mathematical-bible/red-letter.html">Red Letter</a>
+            <a href="/static/mathematical-bible/tsk.html">Cross-Refs</a>
+            <a href="/static/mathematical-bible/prophecy.html">Prophecy</a>
+            <a href="/static/mathematical-bible/naves.html">Nave's</a>
+            <a href="/static/mathematical-bible/fathers.html">Fathers</a>
+            <a href="/static/mathematical-bible/cantillation.html">Cantillation</a>
+            <a href="/oracle">Oracle</a>
+        </nav>
+
+        <h1>Parallel Passages</h1>
+        <p class="subtitle">Compare the Same Events Across Matthew, Mark, Luke, and John</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value">58</div>
+                <div class="stat-label">Total Passages</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">14</div>
+                <div class="stat-label">In All 4 Gospels</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">16</div>
+                <div class="stat-label">In 3 Gospels</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">22</div>
+                <div class="stat-label">In 2 Gospels</div>
+            </div>
+        </div>
+
+        <div class="category-nav">
+            <button class="cat-btn" onclick="scrollToCategory('birth-and-infancy')">Birth and Infancy (6)</button>
+            <button class="cat-btn" onclick="scrollToCategory('baptism-and-temptation')">Baptism and Temptation (3)</button>
+            <button class="cat-btn" onclick="scrollToCategory('sermon-on-the-mount-/-plain')">Sermon on the Mount / Plain (8)</button>
+            <button class="cat-btn" onclick="scrollToCategory('miracles-of-healing')">Miracles of Healing (9)</button>
+            <button class="cat-btn" onclick="scrollToCategory('nature-miracles')">Nature Miracles (5)</button>
+            <button class="cat-btn" onclick="scrollToCategory('exorcisms')">Exorcisms (4)</button>
+            <button class="cat-btn" onclick="scrollToCategory('parables')">Parables (7)</button>
+            <button class="cat-btn" onclick="scrollToCategory('passion-week')">Passion Week (9)</button>
+            <button class="cat-btn" onclick="scrollToCategory('resurrection')">Resurrection (7)</button>
+        </div>
+
+        <div class="category-section" id="birth-and-infancy">
+            <h2 class="category-title">Birth and Infancy</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Genealogy of Jesus</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 1:1-17</div>
+                        <div class="gospel-summary">Abraham to Jesus through David and Solomon (42 generations)</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 3:23-38</div>
+                        <div class="gospel-summary">Jesus to Adam through David and Nathan (77 generations)</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew traces royal lineage; Luke traces biological lineage through Mary</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Genealogy%20of%20Jesus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Annunciation to Mary</span>
+                    <span class="gospel-count">1 Gospel</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew empty">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="not-in">Not in Matthew</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 1:26-38</div>
+                        <div class="gospel-summary">Angel Gabriel announces Jesus' birth to Mary</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only Luke records this; Mary's perspective</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Annunciation%20to%20Mary" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Birth of Jesus</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 1:18-25</div>
+                        <div class="gospel-summary">Joseph's perspective, angel in dream</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 2:1-7</div>
+                        <div class="gospel-summary">Census, no room in inn, manger, shepherds</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew emphasizes Joseph; Luke emphasizes Mary and humble circumstances</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Birth%20of%20Jesus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Visit of the Magi</span>
+                    <span class="gospel-count">1 Gospel</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 2:1-12</div>
+                        <div class="gospel-summary">Wise men from East, star, gold/frankincense/myrrh</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only in Matthew; likely 1-2 years after birth</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Visit%20of%20the%20Magi" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Flight to Egypt</span>
+                    <span class="gospel-count">1 Gospel</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 2:13-15</div>
+                        <div class="gospel-summary">Joseph warned in dream, flee to Egypt</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only in Matthew; fulfills Hosea 11:1</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Flight%20to%20Egypt" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Boy Jesus in the Temple</span>
+                    <span class="gospel-count">1 Gospel</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew empty">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="not-in">Not in Matthew</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 2:41-52</div>
+                        <div class="gospel-summary">12-year-old Jesus discusses with teachers</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only account of Jesus' childhood; 'about my Father's business'</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Boy%20Jesus%20in%20the%20Temple" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="baptism-and-temptation">
+            <h2 class="category-title">Baptism and Temptation</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">John the Baptist's Ministry</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 3:1-12</div>
+                        <div class="gospel-summary">Repent, kingdom at hand, baptism of repentance</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 1:1-8</div>
+                        <div class="gospel-summary">Voice crying in wilderness, baptism</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 3:1-18</div>
+                        <div class="gospel-summary">Detailed historical setting, ethical teaching</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 1:19-28</div>
+                        <div class="gospel-summary">I am not the Christ, voice crying</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All four Gospels; Luke most detailed on ethics</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20John%20the%20Baptist's%20Ministry" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Baptism of Jesus</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 3:13-17</div>
+                        <div class="gospel-summary">Jesus insists John baptize Him; heaven opens</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 1:9-11</div>
+                        <div class="gospel-summary">Spirit descends like dove, voice from heaven</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 3:21-22</div>
+                        <div class="gospel-summary">Praying when heaven opens</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 1:29-34</div>
+                        <div class="gospel-summary">Lamb of God, Spirit remaining on Him</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All four; John emphasizes John the Baptist's testimony</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Baptism%20of%20Jesus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Temptation of Jesus</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 4:1-11</div>
+                        <div class="gospel-summary">40 days, 3 temptations in detail, angels minister</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 1:12-13</div>
+                        <div class="gospel-summary">Brief mention, with wild beasts</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 4:1-13</div>
+                        <div class="gospel-summary">Same 3 temptations, different order</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew/Luke detailed; Mark brief; temptation order differs</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Temptation%20of%20Jesus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="sermon-on-the-mount-/-plain">
+            <h2 class="category-title">Sermon on the Mount / Plain</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Beatitudes</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 5:3-12</div>
+                        <div class="gospel-summary">9 beatitudes, 'poor in spirit', spiritual blessings</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 6:20-26</div>
+                        <div class="gospel-summary">4 beatitudes + 4 woes, 'poor', physical focus</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew on mountain, Luke on plain; Matthew spiritual, Luke material</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Beatitudes" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Salt and Light</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 5:13-16</div>
+                        <div class="gospel-summary">Salt of earth, light of world, city on hill</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 9:50</div>
+                        <div class="gospel-summary">Brief salt reference</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 14:34-35</div>
+                        <div class="gospel-summary">Salt that loses saltiness</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew full teaching; Mark/Luke brief mentions elsewhere</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Salt%20and%20Light" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Lord's Prayer</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 6:9-13</div>
+                        <div class="gospel-summary">Our Father in heaven, full version with doxology</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 11:2-4</div>
+                        <div class="gospel-summary">Shorter version, different setting</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew in Sermon; Luke in response to disciples' request</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Lord's%20Prayer" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Do Not Worry</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 6:25-34</div>
+                        <div class="gospel-summary">Birds, lilies, seek first the kingdom</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 12:22-34</div>
+                        <div class="gospel-summary">Same teaching, different context</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Nearly identical teaching in different settings</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Do%20Not%20Worry" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Judge Not</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 7:1-5</div>
+                        <div class="gospel-summary">Speck and plank, measure you use</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 6:37-42</div>
+                        <div class="gospel-summary">Same teaching, includes blind leading blind</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Core teaching on judgment</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Judge%20Not" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Ask, Seek, Knock</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 7:7-11</div>
+                        <div class="gospel-summary">Father gives good gifts</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 11:9-13</div>
+                        <div class="gospel-summary">Father gives Holy Spirit</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew: good gifts; Luke: Holy Spirit</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Ask,%20Seek,%20Knock" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Golden Rule</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 7:12</div>
+                        <div class="gospel-summary">Do to others as you would have them do</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 6:31</div>
+                        <div class="gospel-summary">Same principle</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Positive formulation of the ethic of reciprocity</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Golden%20Rule" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Wise and Foolish Builders</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 7:24-27</div>
+                        <div class="gospel-summary">Rock vs sand, house that stands/falls</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 6:47-49</div>
+                        <div class="gospel-summary">Deep foundation vs no foundation</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Conclusion of sermon in both Gospels</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Wise%20and%20Foolish%20Builders" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="miracles-of-healing">
+            <h2 class="category-title">Miracles of Healing</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing Peter's Mother-in-Law</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 8:14-15</div>
+                        <div class="gospel-summary">Touched her hand, fever left</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 1:29-31</div>
+                        <div class="gospel-summary">Immediately after synagogue, took her hand</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 4:38-39</div>
+                        <div class="gospel-summary">Rebuked the fever</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All three Synoptics; shows Jesus' personal ministry</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20Peter's%20Mother-in-Law" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Cleansing the Leper</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 8:1-4</div>
+                        <div class="gospel-summary">After Sermon on Mount</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 1:40-45</div>
+                        <div class="gospel-summary">Jesus moved with compassion</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 5:12-16</div>
+                        <div class="gospel-summary">Full of leprosy</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All Synoptics; Jesus touches the untouchable</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Cleansing%20the%20Leper" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing the Paralytic</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 9:1-8</div>
+                        <div class="gospel-summary">Forgives sins, then heals</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 2:1-12</div>
+                        <div class="gospel-summary">Through the roof, crowd amazed</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 5:17-26</div>
+                        <div class="gospel-summary">Pharisees watching</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Authority to forgive sins demonstrated by healing</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20the%20Paralytic" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing Jairus' Daughter</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 9:18-26</div>
+                        <div class="gospel-summary">Ruler's daughter</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 5:21-43</div>
+                        <div class="gospel-summary">Most detailed, Talitha koum</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 8:40-56</div>
+                        <div class="gospel-summary">Only child, about 12 years old</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Intertwined with woman with hemorrhage</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20Jairus'%20Daughter" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Woman with Hemorrhage</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 9:20-22</div>
+                        <div class="gospel-summary">Touched hem of garment</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 5:25-34</div>
+                        <div class="gospel-summary">12 years suffering, whole story</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 8:43-48</div>
+                        <div class="gospel-summary">Spent all on physicians</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Faith healing; Jesus felt power go out</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Woman%20with%20Hemorrhage" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing Two Blind Men</span>
+                    <span class="gospel-count">1 Gospel</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 9:27-31</div>
+                        <div class="gospel-summary">According to your faith</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only in Matthew; cf. Bartimaeus later</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20Two%20Blind%20Men" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing Blind Bartimaeus</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 20:29-34</div>
+                        <div class="gospel-summary">Two blind men near Jericho</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 10:46-52</div>
+                        <div class="gospel-summary">Bartimaeus by name, threw off cloak</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 18:35-43</div>
+                        <div class="gospel-summary">Approaching Jericho</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew has two; Mark names Bartimaeus; Luke different location</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20Blind%20Bartimaeus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing the Centurion's Servant</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 8:5-13</div>
+                        <div class="gospel-summary">Centurion comes to Jesus</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 7:1-10</div>
+                        <div class="gospel-summary">Elders sent as intermediaries</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Great faith praised; Luke adds detail of Jewish elders</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20the%20Centurion's%20Servant" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Healing Man with Withered Hand</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 12:9-14</div>
+                        <div class="gospel-summary">Sabbath controversy</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 3:1-6</div>
+                        <div class="gospel-summary">Jesus angry at hardness of heart</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 6:6-11</div>
+                        <div class="gospel-summary">Right hand</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Sabbath healing leads to plot against Jesus</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Healing%20Man%20with%20Withered%20Hand" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="nature-miracles">
+            <h2 class="category-title">Nature Miracles</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Calming the Storm</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 8:23-27</div>
+                        <div class="gospel-summary">Why are you afraid, O you of little faith</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 4:35-41</div>
+                        <div class="gospel-summary">Asleep on cushion, rebukes wind/sea</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 8:22-25</div>
+                        <div class="gospel-summary">Where is your faith</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Power over nature; disciples' fear</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Calming%20the%20Storm" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Feeding the 5000</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 14:13-21</div>
+                        <div class="gospel-summary">5 loaves, 2 fish, 12 baskets left</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 6:30-44</div>
+                        <div class="gospel-summary">Green grass, groups of 50/100</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 9:10-17</div>
+                        <div class="gospel-summary">Near Bethsaida</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 6:1-14</div>
+                        <div class="gospel-summary">Boy's lunch, Passover near</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only miracle in all four Gospels (besides resurrection)</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Feeding%20the%205000" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Walking on Water</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 14:22-33</div>
+                        <div class="gospel-summary">Peter walks on water too, sinks</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 6:45-52</div>
+                        <div class="gospel-summary">Meant to pass them by, hearts hardened</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 6:16-21</div>
+                        <div class="gospel-summary">Immediately at shore</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew includes Peter's attempt; Mark notes disciples didn't understand</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Walking%20on%20Water" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Feeding the 4000</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 15:32-39</div>
+                        <div class="gospel-summary">7 loaves, few fish, 7 baskets</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 8:1-10</div>
+                        <div class="gospel-summary">3 days with Him, Dalmanutha</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Second feeding miracle; 7 baskets (Gentile number?)</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Feeding%20the%204000" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Fig Tree Cursed</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 21:18-22</div>
+                        <div class="gospel-summary">Withered at once</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 11:12-14, 20-25</div>
+                        <div class="gospel-summary">Not season for figs, next day withered</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Symbol of Israel's fruitlessness; Mark splits over two days</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Fig%20Tree%20Cursed" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="exorcisms">
+            <h2 class="category-title">Exorcisms</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Gadarene/Gerasene Demoniac</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 8:28-34</div>
+                        <div class="gospel-summary">Two demoniacs, swine into sea</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 5:1-20</div>
+                        <div class="gospel-summary">Legion, most detailed account</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 8:26-39</div>
+                        <div class="gospel-summary">Man goes home to tell what Jesus did</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew has two; Mark/Luke have one; location varies</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Gadarene/Gerasene%20Demoniac" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Mute Demoniac</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 9:32-34</div>
+                        <div class="gospel-summary">Mute man speaks, Pharisees accuse</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 11:14</div>
+                        <div class="gospel-summary">Brief mention</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Leads to Beelzebul controversy</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Mute%20Demoniac" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Syrophoenician Woman's Daughter</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 15:21-28</div>
+                        <div class="gospel-summary">Canaanite woman, crumbs from table</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 7:24-30</div>
+                        <div class="gospel-summary">Greek, Syrophoenician by birth</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Great faith of a Gentile woman</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Syrophoenician%20Woman's%20Daughter" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Boy with Evil Spirit</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 17:14-21</div>
+                        <div class="gospel-summary">Epileptic boy, disciples couldn't heal</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 9:14-29</div>
+                        <div class="gospel-summary">Most detailed, I believe help my unbelief</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 9:37-43</div>
+                        <div class="gospel-summary">Only son</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">After Transfiguration; requires prayer (and fasting)</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Boy%20with%20Evil%20Spirit" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="parables">
+            <h2 class="category-title">Parables</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Sower</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 13:1-23</div>
+                        <div class="gospel-summary">Seed, soil types, explanation given</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 4:1-20</div>
+                        <div class="gospel-summary">Secret of kingdom, lamp under basket</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 8:4-15</div>
+                        <div class="gospel-summary">Similar account</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Teaching on how people receive God's word</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Sower" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Mustard Seed</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 13:31-32</div>
+                        <div class="gospel-summary">Smallest seed, greatest of herbs</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 4:30-32</div>
+                        <div class="gospel-summary">Birds nest in branches</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 13:18-19</div>
+                        <div class="gospel-summary">Man planted in garden</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Kingdom starts small, grows large</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Mustard%20Seed" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Leaven</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 13:33</div>
+                        <div class="gospel-summary">Woman hid in three measures</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 13:20-21</div>
+                        <div class="gospel-summary">Same teaching</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Hidden transformative power of the kingdom</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Leaven" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Wicked Tenants</span>
+                    <span class="gospel-count">3 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 21:33-46</div>
+                        <div class="gospel-summary">Owner sends servants, then son</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 12:1-12</div>
+                        <div class="gospel-summary">Beloved son killed, stone rejected</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 20:9-19</div>
+                        <div class="gospel-summary">Long time away</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Judgment on Israel's leaders</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Wicked%20Tenants" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Wedding Feast/Banquet</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 22:1-14</div>
+                        <div class="gospel-summary">King's son, wedding garment</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 14:15-24</div>
+                        <div class="gospel-summary">Great banquet, excuses made</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Invitation to the kingdom rejected</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Wedding%20Feast/Banquet" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Talents/Minas</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 25:14-30</div>
+                        <div class="gospel-summary">5, 2, 1 talents</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 19:11-27</div>
+                        <div class="gospel-summary">10 minas to 10 servants</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Use gifts faithfully; judgment for unfaithfulness</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Talents/Minas" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Parable of the Lost Sheep</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 18:12-14</div>
+                        <div class="gospel-summary">99 on hills, seeks 1</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 15:3-7</div>
+                        <div class="gospel-summary">Joy in heaven over 1 sinner</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">God's seeking love for the lost</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Parable%20of%20the%20Lost%20Sheep" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="passion-week">
+            <h2 class="category-title">Passion Week</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Triumphal Entry</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 21:1-11</div>
+                        <div class="gospel-summary">Two animals, Hosanna, Prophet from Nazareth</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 11:1-11</div>
+                        <div class="gospel-summary">Colt never ridden, looks around temple</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 19:28-44</div>
+                        <div class="gospel-summary">Stones would cry out, weeps over Jerusalem</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 12:12-19</div>
+                        <div class="gospel-summary">Palm branches, Lazarus crowd</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All four; each Gospel has unique details</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Triumphal%20Entry" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Cleansing the Temple</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 21:12-17</div>
+                        <div class="gospel-summary">Den of robbers, healed blind/lame</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 11:15-19</div>
+                        <div class="gospel-summary">Next day after entry, fig tree frames it</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 19:45-48</div>
+                        <div class="gospel-summary">Brief account</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 2:13-22</div>
+                        <div class="gospel-summary">At beginning of ministry, 46 years</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Synoptics at end; John at beginning (possibly two cleansings)</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Cleansing%20the%20Temple" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Last Supper</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 26:17-30</div>
+                        <div class="gospel-summary">Body/blood, covenant</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 14:12-26</div>
+                        <div class="gospel-summary">Similar to Matthew</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 22:7-38</div>
+                        <div class="gospel-summary">New covenant, dispute about greatness</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 13:1-30</div>
+                        <div class="gospel-summary">Foot washing, no institution words</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">John emphasizes service; Synoptics the Eucharist</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Last%20Supper" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Gethsemane Prayer</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 26:36-46</div>
+                        <div class="gospel-summary">Let this cup pass, not my will</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 14:32-42</div>
+                        <div class="gospel-summary">Abba Father, disciples sleep 3x</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 22:39-46</div>
+                        <div class="gospel-summary">Angel strengthens, sweat like blood</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 18:1</div>
+                        <div class="gospel-summary">Brief, across Kidron</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Luke has angel and bloody sweat; John brief</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Gethsemane%20Prayer" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Arrest of Jesus</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 26:47-56</div>
+                        <div class="gospel-summary">Judas' kiss, put away sword</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 14:43-52</div>
+                        <div class="gospel-summary">Young man flees naked</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 22:47-53</div>
+                        <div class="gospel-summary">Heals ear, hour of darkness</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 18:2-12</div>
+                        <div class="gospel-summary">I AM, fall back, Peter named</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Each Gospel has unique details</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Arrest%20of%20Jesus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Peter's Denial</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 26:69-75</div>
+                        <div class="gospel-summary">Three denials, cock crows</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 14:66-72</div>
+                        <div class="gospel-summary">Cock crows twice</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 22:54-62</div>
+                        <div class="gospel-summary">Lord turned and looked at Peter</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 18:15-18, 25-27</div>
+                        <div class="gospel-summary">Another disciple known to high priest</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Luke has Jesus' look; Mark has two cock crows</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Peter's%20Denial" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Trial Before Pilate</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 27:1-2, 11-26</div>
+                        <div class="gospel-summary">Wife's dream, washes hands</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 15:1-15</div>
+                        <div class="gospel-summary">King of Jews, Barabbas released</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 23:1-25</div>
+                        <div class="gospel-summary">Sent to Herod, found no fault</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 18:28-19:16</div>
+                        <div class="gospel-summary">Longest account, What is truth</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Luke alone has Herod; Matthew has Pilate's wife</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Trial%20Before%20Pilate" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Crucifixion</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 27:32-56</div>
+                        <div class="gospel-summary">Darkness, temple veil, saints rise</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 15:21-41</div>
+                        <div class="gospel-summary">Simon of Cyrene named</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 23:26-49</div>
+                        <div class="gospel-summary">Women weep, thief saved, Father forgive</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 19:17-37</div>
+                        <div class="gospel-summary">Woman/beloved disciple, I thirst, It is finished</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Each Gospel has unique sayings and details</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Crucifixion" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Burial</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 27:57-66</div>
+                        <div class="gospel-summary">Joseph of Arimathea, guard set</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 15:42-47</div>
+                        <div class="gospel-summary">Women watch where laid</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 23:50-56</div>
+                        <div class="gospel-summary">Prepared spices, rested on Sabbath</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 19:38-42</div>
+                        <div class="gospel-summary">Nicodemus helps, 75 pounds spices</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All four; John adds Nicodemus</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Burial" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <div class="category-section" id="resurrection">
+            <h2 class="category-title">Resurrection</h2>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Empty Tomb</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 28:1-10</div>
+                        <div class="gospel-summary">Angel rolled stone, earthquake</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 16:1-8</div>
+                        <div class="gospel-summary">Young man in white, afraid</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 24:1-12</div>
+                        <div class="gospel-summary">Two men, Peter runs to tomb</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 20:1-10</div>
+                        <div class="gospel-summary">Mary Magdalene, Peter and John race</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">All four; details vary but core is same</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Empty%20Tomb" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Appearance to the Women</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 28:9-10</div>
+                        <div class="gospel-summary">Jesus meets them, hold his feet</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 20:11-18</div>
+                        <div class="gospel-summary">Mary Magdalene, don't cling to me</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Matthew has group; John focuses on Mary Magdalene</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Appearance%20to%20the%20Women" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Road to Emmaus</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew empty">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="not-in">Not in Matthew</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 16:12-13</div>
+                        <div class="gospel-summary">Brief mention, different form</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 24:13-35</div>
+                        <div class="gospel-summary">Full story, hearts burned, known in breaking bread</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Luke's unique detailed account</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Road%20to%20Emmaus" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Appearance to the Disciples</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew empty">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="not-in">Not in Matthew</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 24:36-49</div>
+                        <div class="gospel-summary">Peace, touch me, eats fish</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 20:19-23</div>
+                        <div class="gospel-summary">Doors locked, breathed on them, receive Spirit</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Luke emphasizes physical reality; John adds Spirit-giving</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Appearance%20to%20the%20Disciples" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">Thomas's Doubt and Faith</span>
+                    <span class="gospel-count">1 Gospel</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew empty">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="not-in">Not in Matthew</div>
+                    </div>
+                    <div class="gospel-box mark empty">
+                        <div class="gospel-name">Mark</div>
+                        <div class="not-in">Not in Mark</div>
+                    </div>
+                    <div class="gospel-box luke empty">
+                        <div class="gospel-name">Luke</div>
+                        <div class="not-in">Not in Luke</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 20:24-29</div>
+                        <div class="gospel-summary">Unless I see and touch, my Lord and my God</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Only in John; blessed who believe without seeing</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20Thomas's%20Doubt%20and%20Faith" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Great Commission</span>
+                    <span class="gospel-count">4 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew ">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="gospel-ref">Matthew 28:16-20</div>
+                        <div class="gospel-summary">All authority, make disciples, baptize, I am with you</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 16:15-18</div>
+                        <div class="gospel-summary">Go into all world, signs follow</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 24:44-49</div>
+                        <div class="gospel-summary">Witnesses, wait for power</div>
+                    </div>
+                    <div class="gospel-box john ">
+                        <div class="gospel-name">John</div>
+                        <div class="gospel-ref">John 20:21-23</div>
+                        <div class="gospel-summary">As Father sent me, I send you</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Each Gospel has unique commissioning</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Great%20Commission" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+            <div class="passage-card">
+                <div class="passage-header">
+                    <span class="passage-title">The Ascension</span>
+                    <span class="gospel-count">2 Gospels</span>
+                </div>
+
+                <div class="gospel-grid">
+                    <div class="gospel-box matthew empty">
+                        <div class="gospel-name">Matthew</div>
+                        <div class="not-in">Not in Matthew</div>
+                    </div>
+                    <div class="gospel-box mark ">
+                        <div class="gospel-name">Mark</div>
+                        <div class="gospel-ref">Mark 16:19</div>
+                        <div class="gospel-summary">Taken up, sat at right hand</div>
+                    </div>
+                    <div class="gospel-box luke ">
+                        <div class="gospel-name">Luke</div>
+                        <div class="gospel-ref">Luke 24:50-53</div>
+                        <div class="gospel-summary">Blessed them, carried up, great joy</div>
+                    </div>
+                    <div class="gospel-box john empty">
+                        <div class="gospel-name">John</div>
+                        <div class="not-in">Not in John</div>
+                    </div>
+                </div>
+
+                <div class="notes-box">
+                    <span class="notes-label">Study Notes:</span>
+                    <span class="notes-text">Also in Acts 1:9-11 (Luke's second volume)</span>
+                </div>
+
+                <a href="/oracle?q=Compare%20the%20Gospel%20accounts%20of%20The%20Ascension" class="oracle-btn">Ask Oracle to Compare</a>
+            </div>
+        </div>
+
+        <script>
+            function scrollToCategory(catId) {
+                document.getElementById(catId).scrollIntoView({ behavior: 'smooth' });
+                document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        </script>
+    </div>
+<!-- Oracle Helper -->
+<script src="oracle-helper.js"></script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Plans - Mathematical Bible</title>
+    <link rel="stylesheet" href="/static/css/quantum-theme.css">
+    <style>
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e8e8e8; font-family: 'Segoe UI', sans-serif; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #ffd700; text-align: center; font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .nav-links { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-links a { color: #888; text-decoration: none; padding: 5px 10px; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover { color: #ffd700; background: rgba(255,215,0,0.1); }
+        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .plan-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; transition: all 0.3s; }
+        .plan-card:hover { border-color: rgba(255,215,0,0.5); transform: translateY(-3px); }
+        .plan-header { margin-bottom: 15px; }
+        .plan-name { font-size: 1.4rem; color: #ffd700; margin-bottom: 8px; }
+        .plan-duration { color: #4a90d9; font-size: 0.9rem; }
+        .plan-description { color: #aaa; margin-bottom: 20px; line-height: 1.5; }
+        .plan-meta { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+        .meta-tag { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; color: #ccc; }
+        .progress-section { margin-bottom: 20px; }
+        .progress-bar-bg { background: rgba(255,255,255,0.1); border-radius: 10px; height: 12px; overflow: hidden; }
+        .progress-bar { background: linear-gradient(90deg, #4CAF50, #8BC34A); height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+        .progress-text { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: #888; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border-radius: 25px; border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #e8e8e8; border: 1px solid rgba(255,255,255,0.2); }
+        .btn:hover { transform: scale(1.05); }
+        .btn-reset { background: rgba(200,50,50,0.3); color: #ff6b6b; }
+
+        /* Active Plan View */
+        .active-plan { display: none; }
+        .active-plan.visible { display: block; }
+        .back-btn { margin-bottom: 20px; }
+        .day-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; }
+        .day-card.completed { border-color: #4CAF50; background: rgba(76,175,80,0.1); }
+        .day-number { font-size: 1.2rem; font-weight: bold; color: #ffd700; min-width: 60px; }
+        .day-readings { flex: 1; }
+        .reading-item { background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 5px; margin: 3px 0; display: inline-block; margin-right: 8px; }
+        .check-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #4CAF50; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem; }
+        .check-btn.checked { background: #4CAF50; color: white; }
+        .check-btn:hover { transform: scale(1.1); }
+
+        .current-streak { background: linear-gradient(135deg, #ff9800, #f57c00); padding: 15px 25px; border-radius: 10px; text-align: center; margin-bottom: 30px; }
+        .streak-value { font-size: 2rem; font-weight: bold; }
+        .streak-label { font-size: 0.9rem; opacity: 0.9; }
+
+        @media (max-width: 600px) {
+            .plans-grid { grid-template-columns: 1fr; }
+            .day-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-links">
+            <a href="/static/mathematical-bible/">Home</a>
+            <a href="/static/mathematical-bible/search.html">Gematria</a>
+            <a href="/static/mathematical-bible/red-letter.html">Red Letter</a>
+            <a href="/static/mathematical-bible/prophecy.html">Prophecy</a>
+            <a href="/static/mathematical-bible/parallels.html">Parallels</a>
+            <a href="/static/mathematical-bible/fathers.html">Fathers</a>
+            <a href="/oracle">Oracle</a>
+        </nav>
+
+        <h1>Bible Reading Plans</h1>
+        <p class="subtitle">Choose a plan and track your progress</p>
+
+        <div id="streak-display" class="current-streak" style="display:none;">
+            <div class="streak-value"><span id="streak-count">0</span> Days</div>
+            <div class="streak-label">Current Reading Streak</div>
+        </div>
+
+        <!-- Plan Selection View -->
+        <div id="plan-selection" class="plans-grid">
+            <div class="plan-card" data-plan-id="bible-in-a-year">
+                <div class="plan-header">
+                    <div class="plan-name">Bible in a Year</div>
+                    <div class="plan-duration">365 days</div>
+                </div>
+                <p class="plan-description">Read through the entire Bible in 365 days with OT, NT, Psalms & Proverbs daily</p>
+                <div class="plan-meta">
+                    <span class="meta-tag">Comprehensive</span>
+                    <span class="meta-tag">Standard</span>
+                    <span class="meta-tag">30 Days</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progress-bible-in-a-year" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="completed-bible-in-a-year">0</span> / 30 days
+                        <span id="percent-bible-in-a-year">0%</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startPlan('bible-in-a-year')">Start / Continue</button>
+                    <button class="btn btn-reset" onclick="resetPlan('bible-in-a-year')">Reset</button>
+                </div>
+            </div>
+            <div class="plan-card" data-plan-id="new-testament-in-90-days">
+                <div class="plan-header">
+                    <div class="plan-name">New Testament in 90 Days</div>
+                    <div class="plan-duration">90 days</div>
+                </div>
+                <p class="plan-description">Complete the New Testament in just 90 days - about 3 chapters per day</p>
+                <div class="plan-meta">
+                    <span class="meta-tag">New Testament</span>
+                    <span class="meta-tag">Intensive</span>
+                    <span class="meta-tag">30 Days</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progress-new-testament-in-90-days" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="completed-new-testament-in-90-days">0</span> / 30 days
+                        <span id="percent-new-testament-in-90-days">0%</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startPlan('new-testament-in-90-days')">Start / Continue</button>
+                    <button class="btn btn-reset" onclick="resetPlan('new-testament-in-90-days')">Reset</button>
+                </div>
+            </div>
+            <div class="plan-card" data-plan-id="psalms-and-proverbs-monthly">
+                <div class="plan-header">
+                    <div class="plan-name">Psalms & Proverbs Monthly</div>
+                    <div class="plan-duration">30 days (repeatable)</div>
+                </div>
+                <p class="plan-description">Read through Psalms and Proverbs every month - 5 Psalms + 1 Proverbs daily</p>
+                <div class="plan-meta">
+                    <span class="meta-tag">Wisdom</span>
+                    <span class="meta-tag">Easy</span>
+                    <span class="meta-tag">30 Days</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progress-psalms-and-proverbs-monthly" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="completed-psalms-and-proverbs-monthly">0</span> / 30 days
+                        <span id="percent-psalms-and-proverbs-monthly">0%</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startPlan('psalms-and-proverbs-monthly')">Start / Continue</button>
+                    <button class="btn btn-reset" onclick="resetPlan('psalms-and-proverbs-monthly')">Reset</button>
+                </div>
+            </div>
+            <div class="plan-card" data-plan-id="gospels-in-40-days">
+                <div class="plan-header">
+                    <div class="plan-name">Gospels in 40 Days</div>
+                    <div class="plan-duration">40 days</div>
+                </div>
+                <p class="plan-description">Journey through all four Gospels in 40 days - perfect for Lent</p>
+                <div class="plan-meta">
+                    <span class="meta-tag">Gospels</span>
+                    <span class="meta-tag">Standard</span>
+                    <span class="meta-tag">40 Days</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progress-gospels-in-40-days" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="completed-gospels-in-40-days">0</span> / 40 days
+                        <span id="percent-gospels-in-40-days">0%</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startPlan('gospels-in-40-days')">Start / Continue</button>
+                    <button class="btn btn-reset" onclick="resetPlan('gospels-in-40-days')">Reset</button>
+                </div>
+            </div>
+            <div class="plan-card" data-plan-id="torah-in-52-weeks">
+                <div class="plan-header">
+                    <div class="plan-name">Torah in 52 Weeks</div>
+                    <div class="plan-duration">52 weeks</div>
+                </div>
+                <p class="plan-description">Read the Five Books of Moses in one year following the traditional weekly Torah portions (Parashat HaShavua)</p>
+                <div class="plan-meta">
+                    <span class="meta-tag">Torah</span>
+                    <span class="meta-tag">Standard</span>
+                    <span class="meta-tag">20 Days</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progress-torah-in-52-weeks" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="completed-torah-in-52-weeks">0</span> / 20 days
+                        <span id="percent-torah-in-52-weeks">0%</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startPlan('torah-in-52-weeks')">Start / Continue</button>
+                    <button class="btn btn-reset" onclick="resetPlan('torah-in-52-weeks')">Reset</button>
+                </div>
+            </div>
+            <div class="plan-card" data-plan-id="prophets-deep-dive">
+                <div class="plan-header">
+                    <div class="plan-name">Prophets Deep Dive</div>
+                    <div class="plan-duration">60 days</div>
+                </div>
+                <p class="plan-description">Study the Major and Minor Prophets over 60 days</p>
+                <div class="plan-meta">
+                    <span class="meta-tag">Prophets</span>
+                    <span class="meta-tag">Intensive</span>
+                    <span class="meta-tag">20 Days</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="progress-prophets-deep-dive" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="completed-prophets-deep-dive">0</span> / 20 days
+                        <span id="percent-prophets-deep-dive">0%</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="startPlan('prophets-deep-dive')">Start / Continue</button>
+                    <button class="btn btn-reset" onclick="resetPlan('prophets-deep-dive')">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Plan View (hidden by default) -->
+        <div id="active-plan" class="active-plan">
+            <button class="btn btn-secondary back-btn" onclick="showPlanSelection()">Back to All Plans</button>
+            <h2 id="active-plan-title"></h2>
+            <div id="active-plan-progress" class="progress-section" style="margin-bottom:20px;">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar" id="active-progress-bar" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="active-completed">0</span> / <span id="active-total">0</span> days
+                    <span id="active-percent">0%</span>
+                </div>
+            </div>
+            <div id="days-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Reading plans data
+        const PLANS = {"bible-in-a-year": {"description": "Read through the entire Bible in 365 days with OT, NT, Psalms & Proverbs daily", "duration": "365 days", "type": "comprehensive", "difficulty": "standard", "readings_per_day": 3, "schedule": [{"day": 1, "readings": ["Genesis 1-2", "Matthew 1", "Psalm 1"]}, {"day": 2, "readings": ["Genesis 3-5", "Matthew 2", "Psalm 2"]}, {"day": 3, "readings": ["Genesis 6-8", "Matthew 3", "Psalm 3"]}, {"day": 4, "readings": ["Genesis 9-11", "Matthew 4", "Psalm 4"]}, {"day": 5, "readings": ["Genesis 12-14", "Matthew 5:1-26", "Psalm 5"]}, {"day": 6, "readings": ["Genesis 15-17", "Matthew 5:27-48", "Psalm 6"]}, {"day": 7, "readings": ["Genesis 18-19", "Matthew 6:1-18", "Psalm 7"]}, {"day": 8, "readings": ["Genesis 20-22", "Matthew 6:19-34", "Psalm 8"]}, {"day": 9, "readings": ["Genesis 23-24", "Matthew 7", "Psalm 9"]}, {"day": 10, "readings": ["Genesis 25-26", "Matthew 8:1-17", "Psalm 10"]}, {"day": 11, "readings": ["Genesis 27-28", "Matthew 8:18-34", "Psalm 11"]}, {"day": 12, "readings": ["Genesis 29-30", "Matthew 9:1-17", "Psalm 12"]}, {"day": 13, "readings": ["Genesis 31-32", "Matthew 9:18-38", "Psalm 13"]}, {"day": 14, "readings": ["Genesis 33-35", "Matthew 10:1-20", "Psalm 14"]}, {"day": 15, "readings": ["Genesis 36-37", "Matthew 10:21-42", "Psalm 15"]}, {"day": 16, "readings": ["Genesis 38-40", "Matthew 11", "Psalm 16"]}, {"day": 17, "readings": ["Genesis 41", "Matthew 12:1-21", "Psalm 17"]}, {"day": 18, "readings": ["Genesis 42-43", "Matthew 12:22-50", "Psalm 18:1-24"]}, {"day": 19, "readings": ["Genesis 44-45", "Matthew 13:1-30", "Psalm 18:25-50"]}, {"day": 20, "readings": ["Genesis 46-47", "Matthew 13:31-58", "Psalm 19"]}, {"day": 21, "readings": ["Genesis 48-50", "Matthew 14:1-21", "Psalm 20"]}, {"day": 22, "readings": ["Exodus 1-3", "Matthew 14:22-36", "Psalm 21"]}, {"day": 23, "readings": ["Exodus 4-6", "Matthew 15:1-20", "Psalm 22:1-18"]}, {"day": 24, "readings": ["Exodus 7-8", "Matthew 15:21-39", "Psalm 22:19-31"]}, {"day": 25, "readings": ["Exodus 9-10", "Matthew 16", "Psalm 23"]}, {"day": 26, "readings": ["Exodus 11-12", "Matthew 17", "Psalm 24"]}, {"day": 27, "readings": ["Exodus 13-14", "Matthew 18:1-20", "Psalm 25"]}, {"day": 28, "readings": ["Exodus 15-16", "Matthew 18:21-35", "Psalm 26"]}, {"day": 29, "readings": ["Exodus 17-19", "Matthew 19", "Psalm 27"]}, {"day": 30, "readings": ["Exodus 20-21", "Matthew 20:1-16", "Psalm 28"]}], "name": "Bible in a Year", "total_days": 30}, "new-testament-in-90-days": {"description": "Complete the New Testament in just 90 days - about 3 chapters per day", "duration": "90 days", "type": "new_testament", "difficulty": "intensive", "readings_per_day": 1, "schedule": [{"day": 1, "readings": ["Matthew 1-4"]}, {"day": 2, "readings": ["Matthew 5-7"]}, {"day": 3, "readings": ["Matthew 8-10"]}, {"day": 4, "readings": ["Matthew 11-13"]}, {"day": 5, "readings": ["Matthew 14-16"]}, {"day": 6, "readings": ["Matthew 17-19"]}, {"day": 7, "readings": ["Matthew 20-22"]}, {"day": 8, "readings": ["Matthew 23-25"]}, {"day": 9, "readings": ["Matthew 26-28"]}, {"day": 10, "readings": ["Mark 1-3"]}, {"day": 11, "readings": ["Mark 4-6"]}, {"day": 12, "readings": ["Mark 7-9"]}, {"day": 13, "readings": ["Mark 10-12"]}, {"day": 14, "readings": ["Mark 13-16"]}, {"day": 15, "readings": ["Luke 1-3"]}, {"day": 16, "readings": ["Luke 4-6"]}, {"day": 17, "readings": ["Luke 7-9"]}, {"day": 18, "readings": ["Luke 10-12"]}, {"day": 19, "readings": ["Luke 13-15"]}, {"day": 20, "readings": ["Luke 16-18"]}, {"day": 21, "readings": ["Luke 19-21"]}, {"day": 22, "readings": ["Luke 22-24"]}, {"day": 23, "readings": ["John 1-3"]}, {"day": 24, "readings": ["John 4-6"]}, {"day": 25, "readings": ["John 7-9"]}, {"day": 26, "readings": ["John 10-12"]}, {"day": 27, "readings": ["John 13-15"]}, {"day": 28, "readings": ["John 16-18"]}, {"day": 29, "readings": ["John 19-21"]}, {"day": 30, "readings": ["Acts 1-4"]}], "name": "New Testament in 90 Days", "total_days": 30}, "psalms-and-proverbs-monthly": {"description": "Read through Psalms and Proverbs every month - 5 Psalms + 1 Proverbs daily", "duration": "30 days (repeatable)", "type": "wisdom", "difficulty": "easy", "readings_per_day": 2, "schedule": [{"day": 1, "readings": ["Psalm 1, 31, 61, 91, 121", "Proverbs 1"]}, {"day": 2, "readings": ["Psalm 2, 32, 62, 92, 122", "Proverbs 2"]}, {"day": 3, "readings": ["Psalm 3, 33, 63, 93, 123", "Proverbs 3"]}, {"day": 4, "readings": ["Psalm 4, 34, 64, 94, 124", "Proverbs 4"]}, {"day": 5, "readings": ["Psalm 5, 35, 65, 95, 125", "Proverbs 5"]}, {"day": 6, "readings": ["Psalm 6, 36, 66, 96, 126", "Proverbs 6"]}, {"day": 7, "readings": ["Psalm 7, 37, 67, 97, 127", "Proverbs 7"]}, {"day": 8, "readings": ["Psalm 8, 38, 68, 98, 128", "Proverbs 8"]}, {"day": 9, "readings": ["Psalm 9, 39, 69, 99, 129", "Proverbs 9"]}, {"day": 10, "readings": ["Psalm 10, 40, 70, 100, 130", "Proverbs 10"]}, {"day": 11, "readings": ["Psalm 11, 41, 71, 101, 131", "Proverbs 11"]}, {"day": 12, "readings": ["Psalm 12, 42, 72, 102, 132", "Proverbs 12"]}, {"day": 13, "readings": ["Psalm 13, 43, 73, 103, 133", "Proverbs 13"]}, {"day": 14, "readings": ["Psalm 14, 44, 74, 104, 134", "Proverbs 14"]}, {"day": 15, "readings": ["Psalm 15, 45, 75, 105, 135", "Proverbs 15"]}, {"day": 16, "readings": ["Psalm 16, 46, 76, 106, 136", "Proverbs 16"]}, {"day": 17, "readings": ["Psalm 17, 47, 77, 107, 137", "Proverbs 17"]}, {"day": 18, "readings": ["Psalm 18, 48, 78, 108, 138", "Proverbs 18"]}, {"day": 19, "readings": ["Psalm 19, 49, 79, 109, 139", "Proverbs 19"]}, {"day": 20, "readings": ["Psalm 20, 50, 80, 110, 140", "Proverbs 20"]}, {"day": 21, "readings": ["Psalm 21, 51, 81, 111, 141", "Proverbs 21"]}, {"day": 22, "readings": ["Psalm 22, 52, 82, 112, 142", "Proverbs 22"]}, {"day": 23, "readings": ["Psalm 23, 53, 83, 113, 143", "Proverbs 23"]}, {"day": 24, "readings": ["Psalm 24, 54, 84, 114, 144", "Proverbs 24"]}, {"day": 25, "readings": ["Psalm 25, 55, 85, 115, 145", "Proverbs 25"]}, {"day": 26, "readings": ["Psalm 26, 56, 86, 116, 146", "Proverbs 26"]}, {"day": 27, "readings": ["Psalm 27, 57, 87, 117, 147", "Proverbs 27"]}, {"day": 28, "readings": ["Psalm 28, 58, 88, 118, 148", "Proverbs 28"]}, {"day": 29, "readings": ["Psalm 29, 59, 89, 119:1-88, 149", "Proverbs 29"]}, {"day": 30, "readings": ["Psalm 30, 60, 90, 119:89-176, 150", "Proverbs 30-31"]}], "name": "Psalms & Proverbs Monthly", "total_days": 30}, "gospels-in-40-days": {"description": "Journey through all four Gospels in 40 days - perfect for Lent", "duration": "40 days", "type": "gospels", "difficulty": "standard", "readings_per_day": 1, "schedule": [{"day": 1, "readings": ["Matthew 1-2"]}, {"day": 2, "readings": ["Matthew 3-4"]}, {"day": 3, "readings": ["Matthew 5-6"]}, {"day": 4, "readings": ["Matthew 7-8"]}, {"day": 5, "readings": ["Matthew 9-10"]}, {"day": 6, "readings": ["Matthew 11-12"]}, {"day": 7, "readings": ["Matthew 13-14"]}, {"day": 8, "readings": ["Matthew 15-16"]}, {"day": 9, "readings": ["Matthew 17-18"]}, {"day": 10, "readings": ["Matthew 19-20"]}, {"day": 11, "readings": ["Matthew 21-22"]}, {"day": 12, "readings": ["Matthew 23-24"]}, {"day": 13, "readings": ["Matthew 25-26"]}, {"day": 14, "readings": ["Matthew 27-28"]}, {"day": 15, "readings": ["Mark 1-2"]}, {"day": 16, "readings": ["Mark 3-4"]}, {"day": 17, "readings": ["Mark 5-6"]}, {"day": 18, "readings": ["Mark 7-8"]}, {"day": 19, "readings": ["Mark 9-10"]}, {"day": 20, "readings": ["Mark 11-12"]}, {"day": 21, "readings": ["Mark 13-14"]}, {"day": 22, "readings": ["Mark 15-16"]}, {"day": 23, "readings": ["Luke 1-2"]}, {"day": 24, "readings": ["Luke 3-4"]}, {"day": 25, "readings": ["Luke 5-6"]}, {"day": 26, "readings": ["Luke 7-8"]}, {"day": 27, "readings": ["Luke 9-10"]}, {"day": 28, "readings": ["Luke 11-12"]}, {"day": 29, "readings": ["Luke 13-14"]}, {"day": 30, "readings": ["Luke 15-16"]}, {"day": 31, "readings": ["Luke 17-18"]}, {"day": 32, "readings": ["Luke 19-20"]}, {"day": 33, "readings": ["Luke 21-22"]}, {"day": 34, "readings": ["Luke 23-24"]}, {"day": 35, "readings": ["John 1-3"]}, {"day": 36, "readings": ["John 4-6"]}, {"day": 37, "readings": ["John 7-9"]}, {"day": 38, "readings": ["John 10-12"]}, {"day": 39, "readings": ["John 13-17"]}, {"day": 40, "readings": ["John 18-21"]}], "name": "Gospels in 40 Days", "total_days": 40}, "torah-in-52-weeks": {"description": "Read the Five Books of Moses in one year following the traditional weekly Torah portions (Parashat HaShavua)", "duration": "52 weeks", "type": "torah", "difficulty": "standard", "readings_per_day": 1, "schedule": [{"day": 1, "readings": ["Genesis 1:1-6:8 (Bereshit)"]}, {"day": 2, "readings": ["Genesis 6:9-11:32 (Noach)"]}, {"day": 3, "readings": ["Genesis 12:1-17:27 (Lech Lecha)"]}, {"day": 4, "readings": ["Genesis 18:1-22:24 (Vayera)"]}, {"day": 5, "readings": ["Genesis 23:1-25:18 (Chayei Sarah)"]}, {"day": 6, "readings": ["Genesis 25:19-28:9 (Toldot)"]}, {"day": 7, "readings": ["Genesis 28:10-32:3 (Vayetze)"]}, {"day": 8, "readings": ["Genesis 32:4-36:43 (Vayishlach)"]}, {"day": 9, "readings": ["Genesis 37:1-40:23 (Vayeshev)"]}, {"day": 10, "readings": ["Genesis 41:1-44:17 (Miketz)"]}, {"day": 11, "readings": ["Genesis 44:18-47:27 (Vayigash)"]}, {"day": 12, "readings": ["Genesis 47:28-50:26 (Vayechi)"]}, {"day": 13, "readings": ["Exodus 1:1-6:1 (Shemot)"]}, {"day": 14, "readings": ["Exodus 6:2-9:35 (Va'eira)"]}, {"day": 15, "readings": ["Exodus 10:1-13:16 (Bo)"]}, {"day": 16, "readings": ["Exodus 13:17-17:16 (Beshalach)"]}, {"day": 17, "readings": ["Exodus 18:1-20:23 (Yitro)"]}, {"day": 18, "readings": ["Exodus 21:1-24:18 (Mishpatim)"]}, {"day": 19, "readings": ["Exodus 25:1-27:19 (Terumah)"]}, {"day": 20, "readings": ["Exodus 27:20-30:10 (Tetzaveh)"]}], "name": "Torah in 52 Weeks", "total_days": 20}, "prophets-deep-dive": {"description": "Study the Major and Minor Prophets over 60 days", "duration": "60 days", "type": "prophets", "difficulty": "intensive", "readings_per_day": 1, "schedule": [{"day": 1, "readings": ["Isaiah 1-3"]}, {"day": 2, "readings": ["Isaiah 4-6"]}, {"day": 3, "readings": ["Isaiah 7-9"]}, {"day": 4, "readings": ["Isaiah 10-12"]}, {"day": 5, "readings": ["Isaiah 13-16"]}, {"day": 6, "readings": ["Isaiah 17-20"]}, {"day": 7, "readings": ["Isaiah 21-24"]}, {"day": 8, "readings": ["Isaiah 25-28"]}, {"day": 9, "readings": ["Isaiah 29-32"]}, {"day": 10, "readings": ["Isaiah 33-36"]}, {"day": 11, "readings": ["Isaiah 37-40"]}, {"day": 12, "readings": ["Isaiah 41-44"]}, {"day": 13, "readings": ["Isaiah 45-48"]}, {"day": 14, "readings": ["Isaiah 49-52"]}, {"day": 15, "readings": ["Isaiah 53-56"]}, {"day": 16, "readings": ["Isaiah 57-60"]}, {"day": 17, "readings": ["Isaiah 61-64"]}, {"day": 18, "readings": ["Isaiah 65-66"]}, {"day": 19, "readings": ["Jeremiah 1-3"]}, {"day": 20, "readings": ["Jeremiah 4-6"]}], "name": "Prophets Deep Dive", "total_days": 20}};
+
+        // LocalStorage keys
+        const STORAGE_KEY = 'bible-reading-progress';
+        const STREAK_KEY = 'bible-reading-streak';
+
+        // Load progress from localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : {};
+        }
+
+        // Save progress to localStorage
+        function saveProgress(progress) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+
+        // Update UI with current progress
+        function updateProgressUI() {
+            const progress = loadProgress();
+
+            Object.keys(PLANS).forEach(planId => {
+                const planProgress = progress[planId] || [];
+                const total = PLANS[planId].total_days;
+                const completed = planProgress.length;
+                const percent = Math.round((completed / total) * 100);
+
+                document.getElementById(`progress-${planId}`).style.width = `${percent}%`;
+                document.getElementById(`completed-${planId}`).textContent = completed;
+                document.getElementById(`percent-${planId}`).textContent = `${percent}%`;
+            });
+
+            // Update streak
+            updateStreak();
+        }
+
+        // Start or continue a plan
+        function startPlan(planId) {
+            const plan = PLANS[planId];
+            const progress = loadProgress()[planId] || [];
+
+            document.getElementById('plan-selection').style.display = 'none';
+            document.getElementById('active-plan').classList.add('visible');
+
+            document.getElementById('active-plan-title').textContent = plan.name;
+            document.getElementById('active-total').textContent = plan.total_days;
+
+            const container = document.getElementById('days-container');
+            container.innerHTML = '';
+
+            plan.schedule.forEach(day => {
+                const isCompleted = progress.includes(day.day);
+                const dayCard = document.createElement('div');
+                dayCard.className = `day-card ${isCompleted ? 'completed' : ''}`;
+                dayCard.id = `day-${planId}-${day.day}`;
+
+                dayCard.innerHTML = `
+                    <div class="day-number">Day ${day.day}</div>
+                    <div class="day-readings">
+                        ${day.readings.map(r => `<span class="reading-item">${r}</span>`).join('')}
+                    </div>
+                    <button class="check-btn ${isCompleted ? 'checked' : ''}" onclick="toggleDay('${planId}', ${day.day})">
+                        ${isCompleted ? '[X]' : ''}
+                    </button>
+                `;
+
+                container.appendChild(dayCard);
+            });
+
+            updateActivePlanProgress(planId);
+        }
+
+        // Toggle day completion
+        function toggleDay(planId, dayNum) {
+            const progress = loadProgress();
+            if (!progress[planId]) progress[planId] = [];
+
+            const index = progress[planId].indexOf(dayNum);
+            if (index > -1) {
+                progress[planId].splice(index, 1);
+            } else {
+                progress[planId].push(dayNum);
+                // Update streak
+                updateStreakOnComplete();
+            }
+
+            saveProgress(progress);
+
+            // Update UI
+            const dayCard = document.getElementById(`day-${planId}-${dayNum}`);
+            const btn = dayCard.querySelector('.check-btn');
+
+            if (progress[planId].includes(dayNum)) {
+                dayCard.classList.add('completed');
+                btn.classList.add('checked');
+                btn.innerHTML = '[X]';
+            } else {
+                dayCard.classList.remove('completed');
+                btn.classList.remove('checked');
+                btn.innerHTML = '';
+            }
+
+            updateActivePlanProgress(planId);
+            updateProgressUI();
+        }
+
+        // Update active plan progress display
+        function updateActivePlanProgress(planId) {
+            const progress = loadProgress()[planId] || [];
+            const total = PLANS[planId].total_days;
+            const completed = progress.length;
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('active-progress-bar').style.width = `${percent}%`;
+            document.getElementById('active-completed').textContent = completed;
+            document.getElementById('active-percent').textContent = `${percent}%`;
+        }
+
+        // Show plan selection view
+        function showPlanSelection() {
+            document.getElementById('active-plan').classList.remove('visible');
+            document.getElementById('plan-selection').style.display = 'grid';
+        }
+
+        // Reset a plan's progress
+        function resetPlan(planId) {
+            if (confirm(`Reset all progress for this plan?`)) {
+                const progress = loadProgress();
+                delete progress[planId];
+                saveProgress(progress);
+                updateProgressUI();
+            }
+        }
+
+        // Streak tracking
+        function updateStreakOnComplete() {
+            const today = new Date().toDateString();
+            const streakData = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}');
+
+            if (streakData.lastDate !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                if (streakData.lastDate === yesterday.toDateString()) {
+                    streakData.count = (streakData.count || 0) + 1;
+                } else {
+                    streakData.count = 1;
+                }
+                streakData.lastDate = today;
+                localStorage.setItem(STREAK_KEY, JSON.stringify(streakData));
+            }
+            updateStreak();
+        }
+
+        function updateStreak() {
+            const streakData = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}');
+            const count = streakData.count || 0;
+
+            if (count > 0) {
+                document.getElementById('streak-display').style.display = 'block';
+                document.getElementById('streak-count').textContent = count;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', updateProgressUI);
+    </script>
+<!-- Oracle Helper -->
+<script src="oracle-helper.js"></script>
+</body>
+</html>

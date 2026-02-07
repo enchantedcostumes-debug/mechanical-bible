@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Frequency - Mathematical Bible</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            color: #E8E8E8;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: #FFD700; font-size: 2.5em; margin-bottom: 0.5em; }
+        .subtitle { text-align: center; color: #C0C0C0; margin-bottom: 2em; }
+
+        nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 2em; flex-wrap: wrap; }
+        nav a { color: #FFD700; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; }
+        nav a:hover { background: rgba(255,215,0,0.1); }
+        .oracle-link { background: linear-gradient(135deg, #1a365d 0%, #3b82f6 100%); color: #fff !important; border: none !important; }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3em;
+            margin-bottom: 2em;
+            flex-wrap: wrap;
+        }
+        .stat-box { text-align: center; }
+        .stat-value { font-size: 2em; color: #FFD700; font-weight: bold; }
+        .stat-label { color: #888; font-size: 0.9em; }
+
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 2em;
+        }
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+        .search-input:focus { outline: none; border-color: #FFD700; }
+
+        .category { margin-bottom: 3em; }
+        .category-title {
+            color: #FFD700;
+            font-size: 1.5em;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 0.5em;
+            margin-bottom: 1.5em;
+        }
+        .category-stats { color: #888; font-size: 0.9em; margin-left: 1em; }
+
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5em;
+        }
+
+        .word-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(192, 192, 192, 0.3);
+            border-radius: 10px;
+            padding: 1.5em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .word-card:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .word-name { color: #FFD700; font-size: 1.2em; font-weight: bold; margin-bottom: 0.3em; }
+        .word-count { font-size: 2em; color: #3b82f6; font-weight: bold; }
+        .word-original {
+            font-family: 'SBL Hebrew', 'SBL Greek', serif;
+            font-size: 1.3em;
+            color: #AAAAFF;
+            margin: 0.5em 0;
+        }
+        .word-note { color: #888; font-size: 0.9em; margin-top: 0.5em; }
+        .word-verses { color: #44AA44; font-size: 0.85em; margin-top: 0.5em; }
+        .word-gematria { color: #FFAA00; font-size: 0.9em; }
+
+        .back-link {
+            display: inline-block;
+            color: #FFD700;
+            text-decoration: none;
+            padding: 0.5em 1em;
+            border: 1px solid #FFD700;
+            border-radius: 5px;
+            margin-bottom: 2em;
+        }
+
+        footer { text-align: center; margin-top: 3em; padding: 2em; border-top: 1px solid rgba(192,192,192,0.3); color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/mathematical-bible/" class="back-link">[Back] Mathematical Bible</a>
+
+        <h1>Word Frequency Statistics</h1>
+        <p class="subtitle">How many times does the Bible say...?</p>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="search.html">Gematria</a>
+            <a href="topics.html">Topics</a>
+            <a href="cantillation.html">Cantillation</a>
+            <a href="prophecy.html">Prophecy</a>
+            <a href="/oracle" class="oracle-link">Ask Oracle</a>
+        </nav>
+
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-value">57</div>
+                <div class="stat-label">Words Tracked</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Search for a word..." onkeyup="filterWords(this.value)">
+        </div>
+
+        <div id="words-container">
+
+        <div class="category" data-category="Divine Names">
+            <h2 class="category-title">Divine Names <span class="category-stats">(6 words, 12,320 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="lord (yhwh)">
+                    <div class="word-name">LORD (YHWH)</div>
+                    <div class="word-count">6,828x</div>
+                    <div class="word-original">יהוה</div>
+                    <div class="word-note">The sacred Tetragrammaton - God's personal name</div>
+                    <div class="word-verses">Key: Exodus 3:14-15, Deuteronomy 6:4, Psalm 23:1</div>
+                </div>
+
+                <div class="word-card" data-word="god (elohim)">
+                    <div class="word-name">God (Elohim)</div>
+                    <div class="word-count">2,606x</div>
+                    <div class="word-original">אֱלֹהִים</div>
+                    <div class="word-note">Plural form used for the one God - hints at Trinity</div>
+                    <div class="word-verses">Key: Genesis 1:1, Deuteronomy 6:4, Psalm 46:1</div>
+                </div>
+
+                <div class="word-card" data-word="god (theos)">
+                    <div class="word-name">God (Theos)</div>
+                    <div class="word-count">1,317x</div>
+                    <div class="word-original">θεός</div>
+                    <div class="word-note">Greek word for God</div>
+                    <div class="word-verses">Key: John 1:1, John 3:16, Romans 8:28</div>
+                </div>
+
+                <div class="word-card" data-word="lord (kyrios)">
+                    <div class="word-name">Lord (Kyrios)</div>
+                    <div class="word-count">717x</div>
+                    <div class="word-original">κύριος</div>
+                    <div class="word-note">Lord, Master - used for both God and Jesus</div>
+                </div>
+
+                <div class="word-card" data-word="lord (adonai)">
+                    <div class="word-name">Lord (Adonai)</div>
+                    <div class="word-count">439x</div>
+                    <div class="word-original">אֲדֹנָי</div>
+                    <div class="word-note">Master, Lord - often substituted when reading YHWH</div>
+                </div>
+
+                <div class="word-card" data-word="father (pater)">
+                    <div class="word-name">Father (Pater)</div>
+                    <div class="word-count">413x</div>
+                    <div class="word-original">πατήρ</div>
+                    <div class="word-note">God as Father - Jesus' distinctive teaching</div>
+                    <div class="word-verses">Key: Matthew 6:9, John 17:1, Romans 8:15</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Christology">
+            <h2 class="category-title">Christology <span class="category-stats">(6 words, 1,824 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="jesus">
+                    <div class="word-name">Jesus</div>
+                    <div class="word-count">983x</div>
+                    <div class="word-original">Ἰησοῦς</div>
+                    <div class="word-note">Greek form of Joshua - 'YHWH saves'</div>
+                    <div class="word-gematria">Gematria: 888</div>
+                </div>
+
+                <div class="word-card" data-word="christ">
+                    <div class="word-name">Christ</div>
+                    <div class="word-count">569x</div>
+                    <div class="word-original">Χριστός</div>
+                    <div class="word-note">Anointed One - Greek translation of Messiah</div>
+                    <div class="word-gematria">Gematria: 1480</div>
+                </div>
+
+                <div class="word-card" data-word="lamb">
+                    <div class="word-name">Lamb</div>
+                    <div class="word-count">98x</div>
+                    <div class="word-note">Sacrificial imagery - 'Lamb of God'</div>
+                    <div class="word-verses">Key: Isaiah 53:7, John 1:29, Revelation 5:6</div>
+                </div>
+
+                <div class="word-card" data-word="son of man">
+                    <div class="word-name">Son of Man</div>
+                    <div class="word-count">88x</div>
+                    <div class="word-note">Jesus' favorite self-designation</div>
+                    <div class="word-verses">Key: Daniel 7:13, Matthew 8:20, Mark 10:45</div>
+                </div>
+
+                <div class="word-card" data-word="son of god">
+                    <div class="word-name">Son of God</div>
+                    <div class="word-count">47x</div>
+                    <div class="word-note">Divine title affirming Jesus' deity</div>
+                </div>
+
+                <div class="word-card" data-word="messiah (mashiach)">
+                    <div class="word-name">Messiah (Mashiach)</div>
+                    <div class="word-count">39x</div>
+                    <div class="word-original">מָשִׁיחַ</div>
+                    <div class="word-note">Anointed One - applied to kings, priests, and THE Messiah</div>
+                    <div class="word-gematria">Gematria: 358</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Holy Spirit">
+            <h2 class="category-title">Holy Spirit <span class="category-stats">(3 words, 1,374 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="holy">
+                    <div class="word-name">Holy</div>
+                    <div class="word-count">611x</div>
+                    <div class="word-note">Set apart, sacred</div>
+                    <div class="word-verses">Key: Isaiah 6:3, 1 Peter 1:16, Revelation 4:8</div>
+                </div>
+
+                <div class="word-card" data-word="spirit (pneuma)">
+                    <div class="word-name">Spirit (Pneuma)</div>
+                    <div class="word-count">385x</div>
+                    <div class="word-original">πνεῦμα</div>
+                    <div class="word-note">Spirit, breath, wind</div>
+                    <div class="word-verses">Key: John 3:8, Acts 2:4, Romans 8:9</div>
+                </div>
+
+                <div class="word-card" data-word="spirit (ruach)">
+                    <div class="word-name">Spirit (Ruach)</div>
+                    <div class="word-count">378x</div>
+                    <div class="word-original">רוּחַ</div>
+                    <div class="word-note">Spirit, breath, wind</div>
+                    <div class="word-verses">Key: Genesis 1:2, Ezekiel 37:9, Isaiah 11:2</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Salvation">
+            <h2 class="category-title">Salvation <span class="category-stats">(10 words, 1,489 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="righteousness">
+                    <div class="word-name">Righteousness</div>
+                    <div class="word-count">302x</div>
+                    <div class="word-note">Right standing with God</div>
+                    <div class="word-verses">Key: Genesis 15:6, Romans 3:22, 2 Corinthians 5:21</div>
+                </div>
+
+                <div class="word-card" data-word="love (ahavah)">
+                    <div class="word-name">Love (Ahavah)</div>
+                    <div class="word-count">250x</div>
+                    <div class="word-original">אַהֲבָה</div>
+                    <div class="word-note">Love in Hebrew</div>
+                    <div class="word-verses">Key: Deuteronomy 6:5, Song of Songs 8:6</div>
+                    <div class="word-gematria">Gematria: 13</div>
+                </div>
+
+                <div class="word-card" data-word="faith (pistis)">
+                    <div class="word-name">Faith (Pistis)</div>
+                    <div class="word-count">244x</div>
+                    <div class="word-original">πίστις</div>
+                    <div class="word-note">Faith, trust, belief</div>
+                    <div class="word-verses">Key: Hebrews 11:1, Romans 1:17, Galatians 2:20</div>
+                </div>
+
+                <div class="word-card" data-word="grace (charis)">
+                    <div class="word-name">Grace (Charis)</div>
+                    <div class="word-count">156x</div>
+                    <div class="word-original">χάρις</div>
+                    <div class="word-note">Unmerited favor - key Pauline term</div>
+                    <div class="word-verses">Key: Ephesians 2:8, Romans 3:24, 2 Corinthians 12:9</div>
+                </div>
+
+                <div class="word-card" data-word="forgiveness">
+                    <div class="word-name">Forgiveness</div>
+                    <div class="word-count">142x</div>
+                    <div class="word-verses">Key: Psalm 32:1, Matthew 6:14, Ephesians 1:7</div>
+                </div>
+
+                <div class="word-card" data-word="faith/believe (emunah)">
+                    <div class="word-name">Faith/Believe (Emunah)</div>
+                    <div class="word-count">127x</div>
+                    <div class="word-original">אֱמוּנָה</div>
+                    <div class="word-note">Faithfulness, steadfastness</div>
+                    <div class="word-verses">Key: Habakkuk 2:4, Genesis 15:6</div>
+                </div>
+
+                <div class="word-card" data-word="love (agape)">
+                    <div class="word-name">Love (Agape)</div>
+                    <div class="word-count">116x</div>
+                    <div class="word-original">ἀγάπη</div>
+                    <div class="word-note">Unconditional, sacrificial love</div>
+                    <div class="word-verses">Key: John 3:16, 1 Corinthians 13:13, 1 John 4:8</div>
+                </div>
+
+                <div class="word-card" data-word="salvation (yeshua)">
+                    <div class="word-name">Salvation (Yeshua)</div>
+                    <div class="word-count">78x</div>
+                    <div class="word-original">יְשׁוּעָה</div>
+                    <div class="word-note">Same root as Jesus' name</div>
+                    <div class="word-verses">Key: Psalm 27:1, Isaiah 12:2</div>
+                </div>
+
+                <div class="word-card" data-word="salvation (soteria)">
+                    <div class="word-name">Salvation (Soteria)</div>
+                    <div class="word-count">46x</div>
+                    <div class="word-original">σωτηρία</div>
+                    <div class="word-note">Deliverance, rescue, salvation</div>
+                </div>
+
+                <div class="word-card" data-word="redemption">
+                    <div class="word-name">Redemption</div>
+                    <div class="word-count">28x</div>
+                    <div class="word-note">Buying back, liberation</div>
+                    <div class="word-verses">Key: Exodus 6:6, Romans 3:24, Ephesians 1:7</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Sin">
+            <h2 class="category-title">Sin <span class="category-stats">(7 words, 1,919 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="evil">
+                    <div class="word-name">Evil</div>
+                    <div class="word-count">613x</div>
+                    <div class="word-note">Moral wickedness</div>
+                </div>
+
+                <div class="word-card" data-word="sin (chata)">
+                    <div class="word-name">Sin (Chata)</div>
+                    <div class="word-count">595x</div>
+                    <div class="word-original">חָטָא</div>
+                    <div class="word-note">To miss, go wrong</div>
+                    <div class="word-verses">Key: Genesis 4:7, Psalm 51:2</div>
+                </div>
+
+                <div class="word-card" data-word="iniquity">
+                    <div class="word-name">Iniquity</div>
+                    <div class="word-count">334x</div>
+                    <div class="word-note">Moral distortion, perversity</div>
+                </div>
+
+                <div class="word-card" data-word="sin (hamartia)">
+                    <div class="word-name">Sin (Hamartia)</div>
+                    <div class="word-count">173x</div>
+                    <div class="word-original">ἁμαρτία</div>
+                    <div class="word-note">Missing the mark</div>
+                    <div class="word-verses">Key: Romans 3:23, Romans 6:23, 1 John 1:9</div>
+                </div>
+
+                <div class="word-card" data-word="transgression">
+                    <div class="word-name">Transgression</div>
+                    <div class="word-count">113x</div>
+                    <div class="word-note">Crossing a boundary, rebellion</div>
+                </div>
+
+                <div class="word-card" data-word="satan">
+                    <div class="word-name">Satan</div>
+                    <div class="word-count">56x</div>
+                    <div class="word-note">The adversary</div>
+                    <div class="word-verses">Key: Job 1:6, Matthew 4:10, Revelation 12:9</div>
+                </div>
+
+                <div class="word-card" data-word="devil (diabolos)">
+                    <div class="word-name">Devil (Diabolos)</div>
+                    <div class="word-count">35x</div>
+                    <div class="word-original">διάβολος</div>
+                    <div class="word-note">The slanderer, accuser</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Covenant">
+            <h2 class="category-title">Covenant <span class="category-stats">(4 words, 3,823 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="israel">
+                    <div class="word-name">Israel</div>
+                    <div class="word-count">2,565x</div>
+                    <div class="word-original">יִשְׂרָאֵל</div>
+                    <div class="word-note">The covenant people</div>
+                    <div class="word-gematria">Gematria: 541</div>
+                </div>
+
+                <div class="word-card" data-word="jerusalem">
+                    <div class="word-name">Jerusalem</div>
+                    <div class="word-count">811x</div>
+                    <div class="word-note">The holy city</div>
+                </div>
+
+                <div class="word-card" data-word="covenant (berith)">
+                    <div class="word-name">Covenant (Berith)</div>
+                    <div class="word-count">287x</div>
+                    <div class="word-original">בְּרִית</div>
+                    <div class="word-note">Agreement, treaty - God's binding promises</div>
+                    <div class="word-verses">Key: Genesis 15:18, Exodus 24:8, Jeremiah 31:31</div>
+                </div>
+
+                <div class="word-card" data-word="zion">
+                    <div class="word-name">Zion</div>
+                    <div class="word-count">160x</div>
+                    <div class="word-note">Mountain of God, heavenly city</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Kingdom">
+            <h2 class="category-title">Kingdom <span class="category-stats">(1 words, 162 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="kingdom">
+                    <div class="word-name">Kingdom</div>
+                    <div class="word-count">162x</div>
+                    <div class="word-note">God's reign and realm</div>
+                    <div class="word-verses">Key: Daniel 2:44, Matthew 6:33, Luke 17:21</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Eschatology">
+            <h2 class="category-title">Eschatology <span class="category-stats">(6 words, 1,542 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="heaven">
+                    <div class="word-name">Heaven</div>
+                    <div class="word-count">691x</div>
+                    <div class="word-note">God's dwelling, eternal destiny</div>
+                </div>
+
+                <div class="word-card" data-word="eternal/everlasting">
+                    <div class="word-name">Eternal/Everlasting</div>
+                    <div class="word-count">439x</div>
+                    <div class="word-note">Without end, age-lasting</div>
+                </div>
+
+                <div class="word-card" data-word="judgment">
+                    <div class="word-name">Judgment</div>
+                    <div class="word-count">294x</div>
+                    <div class="word-verses">Key: Ecclesiastes 12:14, Romans 14:10, Revelation 20:12</div>
+                </div>
+
+                <div class="word-card" data-word="sheol">
+                    <div class="word-name">Sheol</div>
+                    <div class="word-count">65x</div>
+                    <div class="word-original">שְׁאוֹל</div>
+                    <div class="word-note">The grave, realm of the dead</div>
+                </div>
+
+                <div class="word-card" data-word="resurrection">
+                    <div class="word-name">Resurrection</div>
+                    <div class="word-count">41x</div>
+                    <div class="word-verses">Key: John 11:25, 1 Corinthians 15:42, Philippians 3:10</div>
+                </div>
+
+                <div class="word-card" data-word="hell (gehenna)">
+                    <div class="word-name">Hell (Gehenna)</div>
+                    <div class="word-count">12x</div>
+                    <div class="word-original">γέεννα</div>
+                    <div class="word-note">Place of final judgment</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Ethics">
+            <h2 class="category-title">Ethics <span class="category-stats">(9 words, 1,620 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="mercy">
+                    <div class="word-name">Mercy</div>
+                    <div class="word-count">276x</div>
+                    <div class="word-note">Hebrew 'chesed' = loving-kindness</div>
+                </div>
+
+                <div class="word-card" data-word="joy">
+                    <div class="word-name">Joy</div>
+                    <div class="word-count">242x</div>
+                    <div class="word-verses">Key: Nehemiah 8:10, John 15:11, Galatians 5:22</div>
+                </div>
+
+                <div class="word-card" data-word="peace (shalom)">
+                    <div class="word-name">Peace (Shalom)</div>
+                    <div class="word-count">237x</div>
+                    <div class="word-original">שָׁלוֹם</div>
+                    <div class="word-note">Wholeness, completeness, welfare</div>
+                </div>
+
+                <div class="word-card" data-word="wisdom">
+                    <div class="word-name">Wisdom</div>
+                    <div class="word-count">234x</div>
+                    <div class="word-verses">Key: Proverbs 1:7, James 1:5, 1 Corinthians 1:30</div>
+                </div>
+
+                <div class="word-card" data-word="hope">
+                    <div class="word-name">Hope</div>
+                    <div class="word-count">165x</div>
+                    <div class="word-verses">Key: Romans 5:5, Hebrews 6:19, 1 Peter 1:3</div>
+                </div>
+
+                <div class="word-card" data-word="justice">
+                    <div class="word-name">Justice</div>
+                    <div class="word-count">137x</div>
+                    <div class="word-verses">Key: Micah 6:8, Isaiah 1:17, Amos 5:24</div>
+                </div>
+
+                <div class="word-card" data-word="truth (emet)">
+                    <div class="word-name">Truth (Emet)</div>
+                    <div class="word-count">127x</div>
+                    <div class="word-original">אֱמֶת</div>
+                    <div class="word-note">Truth, faithfulness, reliability</div>
+                    <div class="word-gematria">Gematria: 441</div>
+                </div>
+
+                <div class="word-card" data-word="truth (aletheia)">
+                    <div class="word-name">Truth (Aletheia)</div>
+                    <div class="word-count">110x</div>
+                    <div class="word-original">ἀλήθεια</div>
+                    <div class="word-verses">Key: John 14:6, John 8:32, John 17:17</div>
+                </div>
+
+                <div class="word-card" data-word="peace (eirene)">
+                    <div class="word-name">Peace (Eirene)</div>
+                    <div class="word-count">92x</div>
+                    <div class="word-original">εἰρήνη</div>
+                    <div class="word-verses">Key: John 14:27, Philippians 4:7, Romans 5:1</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="category" data-category="Worship">
+            <h2 class="category-title">Worship <span class="category-stats">(5 words, 893 total occurrences)</span></h2>
+            <div class="words-grid">
+
+                <div class="word-card" data-word="temple">
+                    <div class="word-name">Temple</div>
+                    <div class="word-count">243x</div>
+                    <div class="word-note">God's dwelling place</div>
+                </div>
+
+                <div class="word-card" data-word="praise">
+                    <div class="word-name">Praise</div>
+                    <div class="word-count">216x</div>
+                    <div class="word-note">Hebrew 'Hallelujah' = Praise YHWH</div>
+                </div>
+
+                <div class="word-card" data-word="worship">
+                    <div class="word-name">Worship</div>
+                    <div class="word-count">188x</div>
+                    <div class="word-verses">Key: John 4:24, Psalm 95:6, Romans 12:1</div>
+                </div>
+
+                <div class="word-card" data-word="sabbath">
+                    <div class="word-name">Sabbath</div>
+                    <div class="word-count">137x</div>
+                    <div class="word-note">Day of rest</div>
+                    <div class="word-verses">Key: Genesis 2:3, Exodus 20:8, Mark 2:28</div>
+                </div>
+
+                <div class="word-card" data-word="prayer">
+                    <div class="word-name">Prayer</div>
+                    <div class="word-count">109x</div>
+                    <div class="word-verses">Key: 1 Thessalonians 5:17, Matthew 6:9-13, James 5:16</div>
+                </div>
+
+            </div>
+        </div>
+
+        </div>
+
+        <footer>
+            <p>Mathematical Bible - Word Frequency Statistics</p>
+            <p style="font-size:0.9em;color:#666;">Numbers based on standard Hebrew/Greek texts</p>
+        </footer>
+    </div>
+
+    <script>
+        function filterWords(query) {
+            const q = query.toLowerCase();
+            document.querySelectorAll('.word-card').forEach(card => {
+                const word = card.dataset.word;
+                card.style.display = word.includes(q) ? 'block' : 'none';
+            });
+            document.querySelectorAll('.category').forEach(cat => {
+                const visible = cat.querySelectorAll('.word-card[style="display: block"], .word-card:not([style])');
+                cat.style.display = visible.length > 0 ? 'block' : 'none';
+            });
+        }
+    </script>
+<!-- Oracle Helper -->
+<script src="oracle-helper.js"></script>
+</body>
+</html>
