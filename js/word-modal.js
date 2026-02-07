@@ -18,14 +18,16 @@
 let wordData = null;
 let hebrewDefs = null;  // Hebrew definitions keyed by Hebrew word
 let greekMapping = null; // Hebrew to Greek Septuagint mapping
+let timelineData = null; // Separate timeline data for all 58,400 words
 let priorityLoaded = false;
 let fullLoaded = false;
 let defsLoaded = false;
 let greekLoaded = false;
+let timelinesLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
-const DB_VERSION = 5;  // v5: Added 6-stage corruption timelines for 46 control words
+const DB_VERSION = 6;  // v6: Separate timelines.json for ALL 58,400 words
 const STORE_NAME = 'wordData';
 
 // Hebrew prefix characters that can be stripped for root lookup
@@ -215,7 +217,58 @@ function loadFullLexiconInBackground() {
         } catch (e) {
             console.warn('[WARN] Background load failed:', e.message);
         }
+
+        // Also load timelines in background
+        loadTimelinesInBackground();
     }, 2000); // Start after 2 seconds
+}
+
+async function loadTimelinesInBackground() {
+    if (timelinesLoaded) return;
+
+    // Check IndexedDB first
+    const cached = await getFromIndexedDB('timelines');
+    if (cached && Object.keys(cached).length > 50000) {
+        timelineData = cached;
+        timelinesLoaded = true;
+        console.log('[OK] Loaded ' + Object.keys(cached).length + ' timelines from IndexedDB cache');
+        return;
+    }
+
+    console.log('[INFO] Background loading timelines...');
+
+    try {
+        const response = await fetch('/timelines.json');
+        if (response.ok) {
+            const data = await response.json();
+            timelineData = data;
+            timelinesLoaded = true;
+
+            console.log('[OK] Timelines loaded: ' + Object.keys(data).length + ' timelines');
+
+            // Save to IndexedDB
+            saveToIndexedDB('timelines', data)
+                .then(() => console.log('[OK] Timelines cached in IndexedDB'))
+                .catch(e => console.warn('[WARN] Timelines IndexedDB save failed:', e.message));
+        }
+    } catch (e) {
+        console.warn('[WARN] Timelines load failed:', e.message);
+    }
+}
+
+function getTimelineForWord(hebrew) {
+    // First check if word has embedded timeline (Genesis 1:1 scholarly words)
+    const word = wordData?.[hebrew];
+    if (word?.corruption_timeline?.stage_1?.scholarly_debate) {
+        return word.corruption_timeline;
+    }
+
+    // Then check separate timelines data
+    if (timelineData?.[hebrew]) {
+        return timelineData[hebrew];
+    }
+
+    return null;
 }
 
 function updateLoadingIndicator(message) {
@@ -309,69 +362,85 @@ function lookupGreek(hebrew) {
 // ============================================================================
 
 function buildTimelineStages(word, pictographic, septuagintDisplay, ntGreekDisplay, vulgateDisplay, kjvDisplay, definition, timeline) {
-    // If this is a control word with corruption_timeline, use that data
-    const ct = word.corruption_timeline;
+    // Get timeline from separate timelines.json or embedded in word
+    const ct = getTimelineForWord(word.hebrew) || word.corruption_timeline;
 
     if (ct) {
-        // Use the detailed corruption timeline for control words
+        // Handle both formats: full (stage_1) and compact (1)
+        const s1 = ct.stage_1 || ct['1'] || {};
+        const s2 = ct.stage_2 || ct['2'] || {};
+        const s3 = ct.stage_3 || ct['3'] || {};
+        const s4 = ct.stage_4 || ct['4'] || {};
+        const s5 = ct.stage_5 || ct['5'] || {};
+        const s6 = ct.stage_6 || ct['6'] || {};
+
+        // Get values with fallbacks (n=name, p=period, t=text, m=meaning, d=scholarly_debate, tr=transliteration)
+        const getName = (s, def) => s.name || s.n || def;
+        const getPeriod = (s, def) => s.period || s.p || def;
+        const getText = (s, def) => s.text || s.t || def;
+        const getMeaning = (s, def) => s.meaning || s.m || def;
+        const getDebate = (s) => s.scholarly_debate || s.d || s.mechanism || '';
+        const getTranslit = (s) => s.transliteration || s.tr || '';
+
+        // Use detailed corruption timeline
         return `
             <div class="word-timeline-stage">
                 <div class="word-timeline-num">1</div>
                 <div class="word-timeline-content">
-                    <strong>${ct.stage_1?.name || 'Original Hebrew'}</strong>
-                    <span class="word-timeline-period">(${ct.stage_1?.period || 'Ancient'})</span><br>
+                    <strong>${getName(s1, 'Original Hebrew')}</strong>
+                    <span class="word-timeline-period">(${getPeriod(s1, 'Ancient')})</span><br>
                     <span class="word-timeline-hebrew">${word.hebrew}</span><br>
-                    <em class="original-meaning">${ct.stage_1?.meaning || pictographic}</em><br>
-                    <small class="mechanism">${ct.stage_1?.mechanism || ''}</small>
+                    <em class="original-meaning">${getMeaning(s1, pictographic)}</em><br>
+                    <small class="mechanism">${getDebate(s1)}</small>
                 </div>
             </div>
             <div class="word-timeline-stage">
                 <div class="word-timeline-num">2</div>
                 <div class="word-timeline-content">
-                    <strong>${ct.stage_2?.name || 'Septuagint Greek'}</strong>
-                    <span class="word-timeline-period">(${ct.stage_2?.period || '280 BCE'})</span><br>
-                    ${ct.stage_2?.text ? `<span class="greek-word">${ct.stage_2.text}</span>` : ''}
-                    ${ct.stage_2?.transliteration ? ` (${ct.stage_2.transliteration})` : ''}<br>
-                    <em>${ct.stage_2?.meaning || septuagintDisplay}</em><br>
-                    <small class="mechanism decay">${ct.stage_2?.mechanism || ''}</small>
+                    <strong>${getName(s2, 'Septuagint Greek')}</strong>
+                    <span class="word-timeline-period">(${getPeriod(s2, '280 BCE')})</span><br>
+                    ${getText(s2, '') ? `<span class="greek-word">${getText(s2, '')}</span>` : ''}
+                    ${getTranslit(s2) ? ` (${getTranslit(s2)})` : ''}<br>
+                    <em>${getMeaning(s2, septuagintDisplay)}</em><br>
+                    <small class="mechanism decay">${getDebate(s2)}</small>
                 </div>
             </div>
             <div class="word-timeline-stage">
                 <div class="word-timeline-num">3</div>
                 <div class="word-timeline-content">
-                    <strong>${ct.stage_3?.name || 'NT Greek'}</strong>
-                    <span class="word-timeline-period">(${ct.stage_3?.period || '100 CE'})</span><br>
-                    ${ct.stage_3?.text ? `<span class="greek-word">${ct.stage_3.text}</span>` : ''}<br>
-                    <em>${ct.stage_3?.meaning || ntGreekDisplay}</em><br>
-                    <small class="mechanism decay">${ct.stage_3?.mechanism || ''}</small>
+                    <strong>${getName(s3, 'NT Greek')}</strong>
+                    <span class="word-timeline-period">(${getPeriod(s3, '100 CE')})</span><br>
+                    ${getText(s3, '') ? `<span class="greek-word">${getText(s3, '')}</span>` : ''}<br>
+                    <em>${getMeaning(s3, ntGreekDisplay)}</em><br>
+                    <small class="mechanism decay">${getDebate(s3)}</small>
                 </div>
             </div>
             <div class="word-timeline-stage">
                 <div class="word-timeline-num">4</div>
                 <div class="word-timeline-content">
-                    <strong>${ct.stage_4?.name || 'Latin Vulgate'}</strong>
-                    <span class="word-timeline-period">(${ct.stage_4?.period || '400 CE'})</span><br>
-                    <em>${ct.stage_4?.text || '(Latin)'}</em><br>
-                    <em>${ct.stage_4?.meaning || vulgateDisplay}</em><br>
-                    <small class="mechanism decay">${ct.stage_4?.mechanism || ''}</small>
+                    <strong>${getName(s4, 'Latin Vulgate')}</strong>
+                    <span class="word-timeline-period">(${getPeriod(s4, '400 CE')})</span><br>
+                    <em>${getText(s4, '(Latin)')}</em><br>
+                    <em>${getMeaning(s4, vulgateDisplay)}</em><br>
+                    <small class="mechanism decay">${getDebate(s4)}</small>
                 </div>
             </div>
             <div class="word-timeline-stage">
                 <div class="word-timeline-num">5</div>
                 <div class="word-timeline-content">
-                    <strong>${ct.stage_5?.name || 'King James'}</strong>
-                    <span class="word-timeline-period">(${ct.stage_5?.period || '1611 CE'})</span><br>
-                    <em>${ct.stage_5?.text || kjvDisplay}</em><br>
-                    <small class="mechanism decay">${ct.stage_5?.mechanism || ''}</small>
+                    <strong>${getName(s5, 'King James')}</strong>
+                    <span class="word-timeline-period">(${getPeriod(s5, '1611 CE')})</span><br>
+                    <em>${getText(s5, kjvDisplay)}</em><br>
+                    <small class="mechanism decay">${getDebate(s5)}</small>
                 </div>
             </div>
             <div class="word-timeline-stage corrupted">
                 <div class="word-timeline-num">6</div>
                 <div class="word-timeline-content">
-                    <strong>${ct.stage_6?.name || 'Modern English'}</strong>
-                    <span class="word-timeline-period">(${ct.stage_6?.period || 'Today'})</span><br>
-                    <em class="corrupted-meaning">${ct.stage_6?.meaning || definition}</em><br>
-                    <small class="mechanism decay final">${ct.stage_6?.mechanism || ''}</small>
+                    <strong>${getName(s6, 'Modern English')}</strong>
+                    <span class="word-timeline-period">(${getPeriod(s6, 'Today')})</span><br>
+                    <em class="corrupted-meaning">${getMeaning(s6, definition)}</em><br>
+                    <small class="mechanism decay final">${getDebate(s6)}</small>
                 </div>
             </div>
         `;
