@@ -25,7 +25,7 @@ let greekLoaded = false;
 let loadingStatus = 'idle'; // 'idle', 'priority', 'full', 'cached'
 
 const DB_NAME = 'MechanicalBibleDB';
-const DB_VERSION = 2;  // Increment version for new data structure
+const DB_VERSION = 3;  // Increment version - now includes transliteration and definition
 const STORE_NAME = 'wordData';
 
 // Hebrew prefix characters that can be stripped for root lookup
