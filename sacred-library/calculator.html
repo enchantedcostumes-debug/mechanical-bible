@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Numerology Calculator | Oracle Collective</title>
+    
+    
+    <link rel="stylesheet" href="/css/egyptian-theme.css">
+    </head>
+<body >
+    <nav class="sacred-nav">
+        <a href="/sacred-library/">[Back] Sacred Library</a>
+    </nav>
+    <main class="tradition-page">
+        <header class="tradition-header">
+            <h1>Sacred Numerology Calculator</h1>
+            <p>Calculate values across all numerology systems</p>
+        </header>
+
+        <section class="tradition-section">
+            <h2>Multi-System Calculator</h2>
+            <form class="calc-form" id="multi-calc">
+                <input type="text" id="calc-text" placeholder="Enter text..." class="calc-input">
+                <select id="calc-system" class="calc-input">
+                    <option value="hebrew">Hebrew Gematria</option>
+                    <option value="greek">Greek Isopsephy</option>
+                    <option value="arabic">Arabic Abjad</option>
+                    <option value="sanskrit">Sanskrit Katapayadi</option>
+                    <option value="pythagorean">Pythagorean (English)</option>
+                </select>
+                <button type="button" onclick="calculate()" class="calc-btn">[Calculate]</button>
+            </form>
+            <div id="calc-result" class="calc-result"></div>
+        </section>
+
+        <section class="tradition-section">
+            <h2>Systems Available</h2>
+            <div class="info-grid">
+                <a href="/sacred-library/systems/hebrew-gematria" class="info-card">
+                    <h3>Hebrew Gematria</h3>
+                    <p>Aleph-Bet values</p>
+                </a>
+                <a href="/sacred-library/systems/greek-isopsephy" class="info-card">
+                    <h3>Greek Isopsephy</h3>
+                    <p>Alpha-Omega values</p>
+                </a>
+                <a href="/sacred-library/systems/arabic-abjad" class="info-card">
+                    <h3>Arabic Abjad</h3>
+                    <p>Abjad numerals</p>
+                </a>
+                <a href="/sacred-library/systems/sanskrit" class="info-card">
+                    <h3>Sanskrit</h3>
+                    <p>Katapayadi system</p>
+                </a>
+            </div>
+        </section>
+    </main>
+    <footer class="sacred-footer">
+        <p>Copyright (c) 2025 Tammy L Casey. All rights reserved.</p>
+    </footer>
+    <script>
+        async function calculate() {
+            const text = document.getElementById('calc-text').value;
+            const system = document.getElementById('calc-system').value;
+            if (!text) return;
+
+            const result = document.getElementById('calc-result');
+            result.innerHTML = 'Calculating...';
+
+            try {
+                const resp = await fetch('/sacred-library/api/v1/gematria?text=' + encodeURIComponent(text) + '&system=' + system);
+                const data = await resp.json();
+                if (data.success) {
+                    result.innerHTML = '<div class="result-value">Value: <strong>' + (data.gematria.value || data.gematria) + '</strong></div>';
+                } else {
+                    result.innerHTML = 'Error: ' + data.error;
+                }
+            } catch(e) {
+                result.innerHTML = 'Error: ' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>
