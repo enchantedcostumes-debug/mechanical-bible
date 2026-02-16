@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en">
+    <title>Biblical Names - The Mechanical Bible</title>
+    <link rel="stylesheet" href="/css/word-modal.css">
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Georgia, serif;
+    background: linear-gradient(135deg, #0a0808 0%, #1a1410 50%, #0a0808 100%);
+    color: #c0a060;
+    line-height: 1.8;
+    min-height: 100vh;
+}
+
+.container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+
+.hero {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(180deg, rgba(212,175,55,0.1) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(212,175,55,0.3);
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #d4af37;
+    text-shadow: 0 0 30px rgba(212,175,55,0.5);
+    margin-bottom: 10px;
+    letter-spacing: 3px;
+}
+
+.subtitle {
+    color: #a08040;
+    font-size: 1.2em;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.stats-bar {
+    color: #806030;
+    font-size: 0.95em;
+    letter-spacing: 1px;
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.controls input, .controls select {
+    padding: 10px 15px;
+    background: rgba(20,15,10,0.9);
+    border: 1px solid rgba(212,175,55,0.4);
+    color: #d4af37;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+
+.controls input:focus, .controls select:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 10px rgba(212,175,55,0.3);
+}
+
+.controls input { flex: 1; min-width: 200px; }
+
+.view-toggle {
+    display: flex;
+    gap: 5px;
+}
+
+.view-toggle button {
+    padding: 10px 18px;
+    background: rgba(20,15,10,0.8);
+    border: 1px solid rgba(212,175,55,0.3);
+    color: #a08040;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.view-toggle button.active, .view-toggle button:hover {
+    background: rgba(212,175,55,0.2);
+    border-color: #d4af37;
+    color: #d4af37;
+}
+
+/* Hidden message panel */
+.message-panel {
+    background: rgba(20,15,10,0.9);
+    border: 1px solid rgba(212,175,55,0.5);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.message-panel h2 {
+    color: #d4af37;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+.message-panel .sequence {
+    font-size: 1.1em;
+    line-height: 2;
+    color: #e0c070;
+}
+
+.message-panel .sequence .name-meaning {
+    display: inline-block;
+    padding: 3px 8px;
+    margin: 2px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.message-panel .sequence .name-meaning:hover {
+    background: rgba(212,175,55,0.3);
+    border-color: #d4af37;
+}
+
+.gematria-stream {
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+    color: #d4af37;
+    font-size: 1em;
+    word-spacing: 8px;
+    letter-spacing: 1px;
+}
+
+/* Names Table */
+.names-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.names-table th {
+    background: rgba(212,175,55,0.15);
+    color: #d4af37;
+    padding: 12px 10px;
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid rgba(212,175,55,0.4);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.names-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.names-table tr:hover {
+    background: rgba(212,175,55,0.05);
+}
+
+.names-table .hebrew-cell {
+    font-size: 1.4em;
+    direction: rtl;
+    cursor: pointer;
+    color: #d4af37;
+    transition: all 0.3s ease;
+}
+
+.names-table .hebrew-cell:hover {
+    text-shadow: 0 0 15px rgba(212,175,55,0.8);
+    color: #fff;
+}
+
+.names-table .gematria-cell {
+    font-family: 'Courier New', monospace;
+    color: #e0c070;
+    font-weight: bold;
+    text-align: center;
+}
+
+.names-table .dr-cell {
+    font-family: 'Courier New', monospace;
+    color: #a08040;
+    text-align: center;
+}
+
+.names-table .ref-cell {
+    color: #806030;
+    font-size: 12px;
+}
+
+.names-table .pictographic-cell {
+    font-size: 12px;
+    color: #a08040;
+    max-width: 300px;
+}
+
+.names-table .definition-cell {
+    font-size: 12px;
+    color: #c0a060;
+    max-width: 250px;
+}
+
+.names-table .order-cell {
+    color: #806030;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Card view */
+.names-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.name-card {
+    background: rgba(20,15,10,0.8);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.name-card:hover {
+    border-color: #d4af37;
+    box-shadow: 0 0 20px rgba(212,175,55,0.2);
+    transform: translateY(-2px);
+}
+
+.name-card .card-hebrew {
+    font-size: 2em;
+    direction: rtl;
+    color: #d4af37;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.name-card .card-english {
+    text-align: center;
+    font-size: 1.1em;
+    color: #e0c070;
+    margin-bottom: 5px;
+}
+
+.name-card .card-gematria {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 1.3em;
+    color: #d4af37;
+    margin-bottom: 8px;
+}
+
+.name-card .card-pictographic {
+    font-size: 11px;
+    color: #a08040;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.name-card .card-ref {
+    font-size: 11px;
+    color: #806030;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Gematria sequence view */
+.gematria-view {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.gematria-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(20,15,10,0.8);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gematria-chip:hover {
+    border-color: #d4af37;
+    background: rgba(212,175,55,0.15);
+}
+
+.gematria-chip .chip-num {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2em;
+    color: #d4af37;
+    font-weight: bold;
+}
+
+.gematria-chip .chip-name {
+    font-size: 10px;
+    color: #806030;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 { font-size: 1.8em; }
+    .controls { flex-direction: column; }
+    .controls input { min-width: 100%; }
+    .names-table { font-size: 12px; }
+    .names-table td, .names-table th { padding: 6px 4px; }
+    .names-table .pictographic-cell { display: none; }
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    padding: 60px;
+    color: #806030;
+    font-size: 1.2em;
+}
+
+.loading::after {
+    content: '';
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0% { content: ''; }
+    33% { content: '.'; }
+    66% { content: '..'; }
+    100% { content: '...'; }
+}
+
+.hidden { display: none; }
+
+/* Section header */
+.section-header {
+    color: #d4af37;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 30px 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(212,175,55,0.4);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.section-header::before {
+    content: '';
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4af37);
+}
+
+.back-link {
+    display: inline-block;
+    color: #a08040;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 1px solid rgba(212,175,55,0.3);
+    padding: 6px 15px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    border-color: #d4af37;
+    color: #d4af37;
+    background: rgba(212,175,55,0.1);
+}
+
+.count-display {
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 6px;
+    padding: 8px 15px;
+    color: #a08040;
+    font-size: 13px;
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">Back to Mechanical Bible</a>
+
+    <div class="hero">
+        <h1>Biblical Names</h1>
+        <div class="subtitle">Every Name is a Word - Click Any Hebrew to See Its Full Meaning</div>
+        <div class="stats-bar" id="statsBar">Loading names data...</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="Search names (English or Hebrew)...">
+        <select id="categoryFilter">
+            <option value="">All Categories</option>
+            <option value="person">Persons</option>
+            <option value="place">Places</option>
+            <option value="people">Peoples/Nations</option>
+        </select>
+        <select id="bookFilter">
+            <option value="">All Books</option>
+        </select>
+        <div class="view-toggle">
+            <button id="btnTable" class="active" onclick="setView('table')">Table</button>
+            <button id="btnCards" onclick="setView('cards')">Cards</button>
+            <button id="btnGematria" onclick="setView('gematria')">Gematria</button>
+        </div>
+        <div class="count-display" id="countDisplay">--</div>
+    </div>
+
+    <!-- Hidden Message Panel (Genesis 5 Patriarchs) -->
+    <div class="message-panel" id="messagePanel">
+        <h2>The Hidden Message in the Names</h2>
+        <div class="sequence" id="messageSequence">Loading...</div>
+        <div class="gematria-stream" id="gematriaStream"></div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loadingIndicator">Loading biblical names data</div>
+
+    <!-- Table View -->
+    <div id="tableView" class="hidden">
+        <table class="names-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Hebrew</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Gematria</th>
+                    <th>DR</th>
+                    <th>First Appearance</th>
+                    <th>Definition</th>
+                    <th class="pictographic-cell">Pictographic</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Cards View -->
+    <div id="cardsView" class="hidden names-grid"></div>
+
+    <!-- Gematria Sequence View -->
+    <div id="gematriaView" class="hidden">
+        <div class="section-header">Gematria Sequence - Numbers Tell the Story</div>
+        <div class="gematria-view" id="gematriaChips"></div>
+    </div>
+</div>
+
+<script src="/js/site-header.js"></script>
+<script src="/js/word-modal.js"></script>
+<script>
+(function() {
+    let namesData = null;
+    let currentView = 'table';
+    let filteredNames = [];
+
+    // Load names data
+    fetch('/data/bible_names.json')
+        .then(r => r.json())
+        .then(data => {
+            namesData = data;
+            filteredNames = data.names;
+            init();
+        })
+        .catch(err => {
+            document.getElementById('loadingIndicator').textContent =
+                'Error loading names data. Please refresh.';
+            console.error('Failed to load bible_names.json:', err);
+        });
+
+    function init() {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+
+        // Stats
+        const meta = namesData.meta;
+        document.getElementById('statsBar').textContent =
+            meta.total_names + ' names | ' +
+            meta.persons + ' persons | ' +
+            meta.places + ' places | ' +
+            meta.peoples + ' peoples/nations | ' +
+            meta.found_in_words_json + ' with Hebrew data';
+
+        // Populate book filter
+        const books = new Set();
+        namesData.names.forEach(n => {
+            // Split "Genesis 2:8" -> book="Genesis", or "1 Samuel 1:1" -> book="1 Samuel"
+            const ref = n.first_occurrence || '';
+            const match = ref.match(/^(.+?)\s+\d+:\d+$/);
+            if (match) books.add(match[1]);
+        });
+        const select = document.getElementById('bookFilter');
+        Array.from(books).forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b;
+            opt.textContent = b;
+            select.appendChild(opt);
+        });
+
+        // Build hidden message
+        buildHiddenMessage();
+
+        // Render
+        renderAll();
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterNames);
+        document.getElementById('bookFilter').addEventListener('change', filterNames);
+        document.getElementById('categoryFilter').addEventListener('change', filterNames);
+    }
+
+    function buildHiddenMessage() {
+        // Genesis 5 patriarchs - the famous hidden gospel message
+        const gen5 = [
+            { name: 'Adam', meaning: 'Man' },
+            { name: 'Seth', meaning: 'Appointed' },
+            { name: 'Enosh', meaning: 'Mortal' },
+            { name: 'Kenan', meaning: 'Sorrow' },
+            { name: 'Mahalalel', meaning: 'The Blessed God' },
+            { name: 'Jared', meaning: 'Shall Come Down' },
+            { name: 'Enoch', meaning: 'Teaching' },
+            { name: 'Methuselah', meaning: 'His Death Shall Bring' },
+            { name: 'Lamech', meaning: 'The Despairing' },
+            { name: 'Noah', meaning: 'Rest/Comfort' },
+        ];
+
+        const seq = document.getElementById('messageSequence');
+        seq.innerHTML = '';
+
+        // Build the sentence
+        const sentence = gen5.map(g => g.meaning).join(' ');
+        const fullMessage = document.createElement('p');
+        fullMessage.style.marginBottom = '15px';
+        fullMessage.style.color = '#e0c070';
+        fullMessage.style.fontSize = '1.15em';
+        fullMessage.style.fontStyle = 'italic';
+        fullMessage.textContent = '"' + sentence + '"';
+        seq.appendChild(fullMessage);
+
+        // Individual name chips
+        gen5.forEach(g => {
+            const span = document.createElement('span');
+            span.className = 'name-meaning';
+
+            // Find matching entry in data
+            const entry = namesData.names.find(n =>
+                n.english.includes(g.name) &&
+                n.first_occurrence.startsWith('Genesis')
+            );
+
+            span.innerHTML = '<strong>' + g.name + '</strong><br><small>' + g.meaning + '</small>';
+            if (entry && entry.hebrew) {
+                span.onclick = function() { showWordEvolution(entry.hebrew); };
+            }
+            seq.appendChild(span);
+        });
+
+        // Show gematria stream
+        const stream = document.getElementById('gematriaStream');
+        const gVals = gen5.map(g => {
+            const entry = namesData.names.find(n =>
+                n.english.includes(g.name) &&
+                n.first_occurrence.startsWith('Genesis')
+            );
+            return entry ? entry.gematria : '?';
+        });
+        stream.textContent = 'Gematria: ' + gVals.join(' - ');
+
+        // Sum
+        const sum = gVals.filter(v => typeof v === 'number').reduce((a, b) => a + b, 0);
+        stream.textContent += ' = ' + sum;
+    }
+
+    function filterNames() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const book = document.getElementById('bookFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+
+        filteredNames = namesData.names.filter(n => {
+            const matchesSearch = !search ||
+                n.english.toLowerCase().includes(search) ||
+                n.hebrew.includes(search) ||
+                (n.transliteration || '').toLowerCase().includes(search) ||
+                (n.definition || '').toLowerCase().includes(search) ||
+                String(n.gematria).includes(search);
+
+            const ref = n.first_occurrence || '';
+            const refMatch = ref.match(/^(.+?)\s+\d+:\d+$/);
+            const nameBook = refMatch ? refMatch[1] : '';
+            const matchesBook = !book || nameBook === book;
+
+            const matchesCategory = !category ||
+                n.category === category;
+
+            return matchesSearch && matchesBook && matchesCategory;
+        });
+
+        renderAll();
+    }
+
+    function setView(view) {
+        currentView = view;
+        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
+        renderAll();
+    }
+
+    function renderAll() {
+        document.getElementById('countDisplay').textContent =
+            filteredNames.length + ' of ' + namesData.names.length + ' names';
+
+        // Hide all views
+        document.getElementById('tableView').classList.add('hidden');
+        document.getElementById('cardsView').classList.add('hidden');
+        document.getElementById('gematriaView').classList.add('hidden');
+
+        if (currentView === 'table') {
+            renderTable();
+            document.getElementById('tableView').classList.remove('hidden');
+        } else if (currentView === 'cards') {
+            renderCards();
+            document.getElementById('cardsView').classList.remove('hidden');
+        } else {
+            renderGematria();
+            document.getElementById('gematriaView').classList.remove('hidden');
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        const catLabels = { person: 'Person', place: 'Place', people: 'People' };
+
+        filteredNames.forEach(n => {
+            const tr = document.createElement('tr');
+            const catLabel = catLabels[n.category] || n.category;
+            tr.innerHTML =
+                '<td class="order-cell">' + n.order + '</td>' +
+                '<td class="hebrew-cell">' + (n.hebrew || '-') + '</td>' +
+                '<td>' + escapeHtml(n.english) + '</td>' +
+                '<td class="ref-cell">' + catLabel + '</td>' +
+                '<td class="gematria-cell">' + (n.gematria || '-') + '</td>' +
+                '<td class="dr-cell">' + (n.digital_root || '-') + '</td>' +
+                '<td class="ref-cell">' + escapeHtml(n.first_occurrence) + '</td>' +
+                '<td class="definition-cell">' + escapeHtml(truncate(n.definition, 60)) + '</td>' +
+                '<td class="pictographic-cell">' + escapeHtml(truncate(n.pictographic, 80)) + '</td>';
+
+            // Click Hebrew cell to open word evolution
+            if (n.hebrew) {
+                const hebrewCell = tr.children[1];
+                hebrewCell.onclick = function() { showWordEvolution(n.hebrew); };
+            }
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderCards() {
+        const grid = document.getElementById('cardsView');
+        grid.innerHTML = '';
+
+        filteredNames.forEach(n => {
+            const card = document.createElement('div');
+            card.className = 'name-card';
+            card.onclick = function() {
+                if (n.hebrew) showWordEvolution(n.hebrew);
+            };
+            card.innerHTML =
+                '<div class="card-hebrew">' + n.hebrew + '</div>' +
+                '<div class="card-english">' + escapeHtml(n.english) + '</div>' +
+                '<div class="card-gematria">' + (n.gematria || '?') +
+                    (n.digital_root ? ' <small style="color:#806030">(dr=' + n.digital_root + ')</small>' : '') +
+                '</div>' +
+                '<div class="card-pictographic">' + escapeHtml(truncate(n.pictographic, 120)) + '</div>' +
+                '<div class="card-ref">' + escapeHtml(n.first_occurrence) + '</div>';
+            grid.appendChild(card);
+        });
+    }
+
+    function renderGematria() {
+        const chips = document.getElementById('gematriaChips');
+        chips.innerHTML = '';
+
+        filteredNames.forEach(n => {
+            const chip = document.createElement('div');
+            chip.className = 'gematria-chip';
+            chip.onclick = function() {
+                if (n.hebrew) showWordEvolution(n.hebrew);
+            };
+            chip.innerHTML =
+                '<span class="chip-num">' + (n.gematria || '?') + '</span>' +
+                '<span class="chip-name">' + escapeHtml(n.english.split(' ')[0]) + '</span>';
+            chips.appendChild(chip);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function truncate(str, len) {
+        if (!str) return '';
+        return str.length > len ? str.substring(0, len) + '...' : str;
+    }
+
+    // Expose setView globally
+    window.setView = setView;
+})();
+</script>
+<script src="/js/site-footer.js"></script>
+</body>
+</html>

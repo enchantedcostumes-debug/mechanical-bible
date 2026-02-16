@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="/search.html">Search</a>
                 <a href="/tsk.html">Cross-References</a>
                 <a href="/red-letter.html" class="red-letter">Red Letter</a>
+                <a href="/names.html">Names</a>
                 <a href="https://ozark-oracle.com/" target="_blank">Apokalypsis</a>
             </nav>
             <button class="mobile-menu-toggle" aria-label="Toggle menu">
@@ -48,7 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const href = link.getAttribute('href');
         if (href === currentPath ||
             (href === '/' && currentPath === '/index.html') ||
-            (currentPath.startsWith('/sacred-library') && href === '/sacred-library/')) {
+            (currentPath.startsWith('/sacred-library') && href === '/sacred-library/') ||
+            (currentPath === '/names.html' && href === '/names.html')) {
             link.classList.add('active');
         }
     });
