@@ -128,13 +128,8 @@
                     if (!rs) {
                         rs = document.createElement('span');
                         rs.className = 'oracle';
-                        // Insert before toggle-translation
-                        var toggle = div.querySelector('.toggle-translation');
-                        if (toggle) {
-                            div.insertBefore(rs, toggle);
-                        } else {
-                            div.appendChild(rs);
-                        }
+                        // Insert as FIRST child so Oracle shows first
+                        div.insertBefore(rs, div.firstChild);
                     }
                     rs.textContent = vd.text || '';
                 });
