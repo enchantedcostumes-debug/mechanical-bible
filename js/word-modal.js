@@ -12,6 +12,33 @@
  */
 
 // ============================================================================
+// BASE PATH - resolves relative paths for both root and subdirectory pages
+// ============================================================================
+
+const WORD_MODAL_BASE = (function() {
+    // For http/https: use root-relative paths (works on web servers)
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+        return '/';
+    }
+    // For file:// protocol: detect base from script src
+    const scripts = document.getElementsByTagName('script');
+    for (let i = 0; i < scripts.length; i++) {
+        const src = scripts[i].src || '';
+        if (src.includes('/js/word-modal.js')) {
+            const idx = src.indexOf('/js/word-modal.js');
+            return src.substring(0, idx + 1);
+        }
+    }
+    // Fallback for file:// when script detection fails
+    const path = window.location.pathname;
+    const parts = path.split('/').filter(Boolean);
+    if (parts.length >= 2 && parts[parts.length - 1].endsWith('.html')) {
+        return '../';
+    }
+    return '';
+})();
+
+// ============================================================================
 // STATE
 // ============================================================================
 
@@ -92,7 +119,7 @@ async function loadHebrewDefinitions() {
     if (defsLoaded && hebrewDefs) return hebrewDefs;
 
     try {
-        const response = await fetch('/data/hebrew_definitions.json');
+        const response = await fetch(WORD_MODAL_BASE + 'data/hebrew_definitions.json');
         if (response.ok) {
             hebrewDefs = await response.json();
             defsLoaded = true;
@@ -108,7 +135,7 @@ async function loadGreekMapping() {
     if (greekLoaded && greekMapping) return greekMapping;
 
     try {
-        const response = await fetch('/data/hebrew_greek_mapping.json');
+        const response = await fetch(WORD_MODAL_BASE + 'data/hebrew_greek_mapping.json');
         if (response.ok) {
             greekMapping = await response.json();
             greekLoaded = true;
@@ -163,7 +190,7 @@ async function loadWordData() {
     if (!priorityLoaded) {
         loadingStatus = 'priority';
         try {
-            const response = await fetch('/words-priority.json');
+            const response = await fetch(WORD_MODAL_BASE + 'words-priority.json');
             if (response.ok) {
                 const priority = await response.json();
                 wordData = priority;
@@ -191,7 +218,7 @@ async function loadFullLexicon() {
     loadingStatus = 'full';
     updateLoadingIndicator('Loading complete lexicon (58,400 words)...');
 
-    const response = await fetch('/words.json');
+    const response = await fetch(WORD_MODAL_BASE + 'words.json');
     if (!response.ok) {
         throw new Error('Failed to load word data');
     }
@@ -220,7 +247,7 @@ function loadFullLexiconInBackground() {
         loadingStatus = 'full';
 
         try {
-            const response = await fetch('/words.json');
+            const response = await fetch(WORD_MODAL_BASE + 'words.json');
             if (response.ok) {
                 const data = await response.json();
                 wordData = data;
@@ -258,7 +285,7 @@ async function loadTimelinesInBackground() {
     console.log('[INFO] Background loading timelines...');
 
     try {
-        const response = await fetch('/timelines.json');
+        const response = await fetch(WORD_MODAL_BASE + 'timelines.json');
         if (response.ok) {
             const data = await response.json();
             timelineData = data;
