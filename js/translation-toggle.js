@@ -108,7 +108,7 @@
     }
 
     function loadOracle() {
-        var url = BASE + 'data/oracle/' + bookFolder + '.json';
+        var url = BASE + 'data/oracle/' + bookFolder + '.json?v=' + Date.now();
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(data) {
