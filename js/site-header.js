@@ -15,9 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="/sacred-library/">Sacred Library</a>
                 <a href="/search.html">Search</a>
                 <a href="/tsk.html">Cross-References</a>
-                <a href="/red-letter.html" class="red-letter">Red Letter</a>
                 <a href="/names.html">Names</a>
-                <a href="https://ozark-oracle.com/" target="_blank">Apokalypsis</a>
+                <a href="https://ozark-oracle.com/" target="_blank" class="red-letter">Apokalypsis</a>
             </nav>
             <button class="mobile-menu-toggle" aria-label="Toggle menu">
                 <span></span>
