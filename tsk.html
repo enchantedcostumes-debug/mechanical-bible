@@ -7,76 +7,376 @@
     <meta http-equiv="Content-Language" content="en">
     <title>Treasury of Scripture Knowledge - Cross-Reference Bible</title>
     <link rel="stylesheet" href="css/egyptian-theme.css">
-    <link rel="stylesheet" href="css/word-modal.css">
+    <style>
+.tsk-app { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+/* Search bar */
+.tsk-search {
+    display: flex; gap: 10px; margin: 30px 0 20px;
+    flex-wrap: wrap;
+}
+.tsk-search select, .tsk-search input, .tsk-search button {
+    font-family: 'Segoe UI', Georgia, serif;
+    font-size: 15px; padding: 10px 14px;
+    background: rgba(20,15,10,0.9);
+    color: #c0a060; border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 4px;
+}
+.tsk-search select { flex: 0 0 180px; }
+.tsk-search input { flex: 0 0 70px; text-align: center; }
+.tsk-search button {
+    background: rgba(212,175,55,0.2); cursor: pointer;
+    border-color: #d4af37; color: #d4af37; font-weight: bold;
+}
+.tsk-search button:hover { background: rgba(212,175,55,0.35); }
+
+/* Stats bar */
+.tsk-stats {
+    display: flex; gap: 30px; justify-content: center;
+    padding: 20px; margin: 20px 0;
+    border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;
+    background: rgba(20,15,10,0.8);
+    flex-wrap: wrap;
+}
+.tsk-stat { text-align: center; }
+.tsk-stat-num { font-size: 1.8em; color: #d4af37; font-weight: bold; }
+.tsk-stat-lbl { font-size: 12px; color: #806030; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Results */
+.tsk-results { margin-top: 20px; }
+.tsk-verse-block {
+    background: rgba(20,15,10,0.8); border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 8px; padding: 20px; margin-bottom: 15px;
+}
+.tsk-verse-ref {
+    font-size: 1.1em; font-weight: bold; color: #d4af37;
+    margin-bottom: 12px; cursor: pointer;
+}
+.tsk-verse-ref:hover { text-decoration: underline; }
+.tsk-ref-list { list-style: none; padding: 0; margin: 0; }
+.tsk-ref-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; border-bottom: 1px solid rgba(212,175,55,0.1);
+    transition: background 0.2s;
+}
+.tsk-ref-item:last-child { border-bottom: none; }
+.tsk-ref-item:hover { background: rgba(212,175,55,0.08); }
+.tsk-ref-link {
+    color: #c0a060; text-decoration: none; font-size: 14px;
+}
+.tsk-ref-link:hover { color: #d4af37; }
+.tsk-votes {
+    font-size: 11px; color: #806030; min-width: 40px; text-align: right;
+}
+.tsk-ref-count {
+    font-size: 13px; color: #806030; margin-left: 10px;
+}
+
+/* Chapter overview */
+.tsk-chapter-nav {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 15px 0;
+}
+.tsk-ch-btn {
+    padding: 6px 10px; font-size: 13px; cursor: pointer;
+    background: rgba(20,15,10,0.8); color: #c0a060;
+    border: 1px solid rgba(212,175,55,0.3); border-radius: 4px;
+    font-family: inherit;
+}
+.tsk-ch-btn:hover, .tsk-ch-btn.active {
+    background: rgba(212,175,55,0.2); border-color: #d4af37; color: #d4af37;
+}
+
+/* Loading */
+.tsk-loading { text-align: center; padding: 40px; color: #806030; font-style: italic; }
+
+/* Info box */
+.tsk-info {
+    background: rgba(20,15,10,0.9); border: 1px solid rgba(212,175,55,0.3);
+    padding: 20px; border-radius: 8px; margin-bottom: 20px;
+    color: #a08040; font-size: 14px; line-height: 1.7;
+}
+.tsk-info strong { color: #d4af37; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .tsk-search select { flex: 1 1 100%; }
+    .tsk-search input { flex: 1 1 60px; }
+    .tsk-stats { gap: 15px; }
+    .tsk-stat-num { font-size: 1.4em; }
+}
+</style>
 </head>
 <body>
     <div class="hero">
         <h1>Treasury of Scripture Knowledge</h1>
-        <p class="subtitle">The Most Comprehensive Bible Cross-Reference System Ever Created</p>
-        <p class="stats">500,000+ Cross-References | 31,102 Verses | 66 Books Interconnected</p>
-
-        
+        <p class="subtitle">343,633 Cross-References Across 66 Books</p>
     </div>
 
-    <div class="container">
-        <div class="intro">
-            <h2>What is the Treasury of Scripture Knowledge?</h2>
-            <p>The Treasury of Scripture Knowledge (TSK) is the most exhaustive cross-reference system for the Bible ever compiled. Originally published in 1836, it contains over 500,000 cross-references linking related verses throughout Scripture.</p>
-            <p>The Mechanical Bible integrates TSK with Hebrew pictographic analysis, showing not just <em>that</em> verses connect, but <em>why</em> they connect through shared Hebrew root words and concepts.</p>
-        </div>
-
-        <div class="stats-box">
-            <div class="stat">
-                <div class="stat-number">500,000+</div>
-                <div class="stat-label">Cross-References</div>
+    <div class="tsk-app">
+        <div class="tsk-stats">
+            <div class="tsk-stat">
+                <div class="tsk-stat-num">343,633</div>
+                <div class="tsk-stat-lbl">Cross-References</div>
             </div>
-            <div class="stat">
-                <div class="stat-number">31,102</div>
-                <div class="stat-label">Verses Connected</div>
+            <div class="tsk-stat">
+                <div class="tsk-stat-num">66</div>
+                <div class="tsk-stat-lbl">Books</div>
             </div>
-            <div class="stat">
-                <div class="stat-number">66</div>
-                <div class="stat-label">Books Linked</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">1836</div>
-                <div class="stat-label">Year First Published</div>
+            <div class="tsk-stat">
+                <div class="tsk-stat-num">31,102</div>
+                <div class="tsk-stat-lbl">Verses Connected</div>
             </div>
         </div>
 
-        <div class="coming-soon">
-            <h2>Coming Soon</h2>
-            <p>Full TSK integration with the Mechanical Bible is currently in development. When complete, every verse will show:</p>
+        <div class="tsk-info">
+            <strong>How to use:</strong> Select a book, enter a chapter number, and click Search.
+            Every verse in that chapter will show its cross-references, ranked by relevance.
+            Click any verse reference to read it in the Mechanical Bible.
         </div>
 
-        <div class="feature-list">
-            <div class="feature">
-                <h3>Visual Reference Network</h3>
-                <p>Interactive graph showing how verses connect across the entire Bible - see the web of Scripture at a glance.</p>
-            </div>
-            <div class="feature">
-                <h3>Hebrew Root Connections</h3>
-                <p>Cross-references grouped by shared Hebrew root words, revealing thematic connections invisible in English.</p>
-            </div>
-            <div class="feature">
-                <h3>Parallel Passage View</h3>
-                <p>Side-by-side comparison of related passages with synchronized Hebrew/Greek text and pictographic analysis.</p>
-            </div>
-            <div class="feature">
-                <h3>Prophecy Fulfillment Tracking</h3>
-                <p>Every Old Testament prophecy linked to its New Testament fulfillment with original language verification.</p>
-            </div>
+        <div class="tsk-search">
+            <select id="tsk-book">
+                <optgroup label="Old Testament">
+                    <option value="genesis">Genesis</option>
+                    <option value="exodus">Exodus</option>
+                    <option value="leviticus">Leviticus</option>
+                    <option value="numbers">Numbers</option>
+                    <option value="deuteronomy">Deuteronomy</option>
+                    <option value="joshua">Joshua</option>
+                    <option value="judges">Judges</option>
+                    <option value="ruth">Ruth</option>
+                    <option value="i_samuel">1 Samuel</option>
+                    <option value="ii_samuel">2 Samuel</option>
+                    <option value="i_kings">1 Kings</option>
+                    <option value="ii_kings">2 Kings</option>
+                    <option value="i_chronicles">1 Chronicles</option>
+                    <option value="ii_chronicles">2 Chronicles</option>
+                    <option value="ezra">Ezra</option>
+                    <option value="nehemiah">Nehemiah</option>
+                    <option value="esther">Esther</option>
+                    <option value="job">Job</option>
+                    <option value="psalms">Psalms</option>
+                    <option value="proverbs">Proverbs</option>
+                    <option value="ecclesiastes">Ecclesiastes</option>
+                    <option value="song_of_songs">Song of Songs</option>
+                    <option value="isaiah">Isaiah</option>
+                    <option value="jeremiah">Jeremiah</option>
+                    <option value="lamentations">Lamentations</option>
+                    <option value="ezekiel">Ezekiel</option>
+                    <option value="daniel">Daniel</option>
+                    <option value="hosea">Hosea</option>
+                    <option value="joel">Joel</option>
+                    <option value="amos">Amos</option>
+                    <option value="obadiah">Obadiah</option>
+                    <option value="jonah">Jonah</option>
+                    <option value="micah">Micah</option>
+                    <option value="nahum">Nahum</option>
+                    <option value="habakkuk">Habakkuk</option>
+                    <option value="zephaniah">Zephaniah</option>
+                    <option value="haggai">Haggai</option>
+                    <option value="zechariah">Zechariah</option>
+                    <option value="malachi">Malachi</option>
+                </optgroup>
+                <optgroup label="New Testament">
+                    <option value="matthew">Matthew</option>
+                    <option value="mark">Mark</option>
+                    <option value="luke">Luke</option>
+                    <option value="john">John</option>
+                    <option value="acts">Acts</option>
+                    <option value="romans">Romans</option>
+                    <option value="1_corinthians">1 Corinthians</option>
+                    <option value="2_corinthians">2 Corinthians</option>
+                    <option value="galatians">Galatians</option>
+                    <option value="ephesians">Ephesians</option>
+                    <option value="philippians">Philippians</option>
+                    <option value="colossians">Colossians</option>
+                    <option value="1_thessalonians">1 Thessalonians</option>
+                    <option value="2_thessalonians">2 Thessalonians</option>
+                    <option value="1_timothy">1 Timothy</option>
+                    <option value="2_timothy">2 Timothy</option>
+                    <option value="titus">Titus</option>
+                    <option value="philemon">Philemon</option>
+                    <option value="hebrews">Hebrews</option>
+                    <option value="james">James</option>
+                    <option value="1_peter">1 Peter</option>
+                    <option value="2_peter">2 Peter</option>
+                    <option value="1_john">1 John</option>
+                    <option value="2_john">2 John</option>
+                    <option value="3_john">3 John</option>
+                    <option value="jude">Jude</option>
+                    <option value="revelation">Revelation</option>
+                </optgroup>
+            </select>
+            <input type="number" id="tsk-chapter" value="1" min="1" max="150" placeholder="Ch">
+            <button id="tsk-go">SEARCH</button>
         </div>
 
-        <div class="history">
-            <h3>History of the TSK</h3>
-            <p>The Treasury of Scripture Knowledge was compiled by R.A. Torrey and published in 1836. It built upon the work of earlier scholars, particularly the marginal references in the 1611 King James Bible and the cross-reference work of John Brown of Haddington.</p>
-            <p>Unlike a concordance (which lists where words appear), the TSK shows <strong>conceptual connections</strong> - verses that illuminate each other's meaning even when they don't share exact vocabulary.</p>
+        <div class="tsk-chapter-nav" id="tsk-chapters"></div>
+        <div class="tsk-results" id="tsk-results">
+            <div class="tsk-loading">Select a book and chapter to view cross-references.</div>
         </div>
+    </div>
 
-        </div>
+    <script>
+(function() {
+    'use strict';
 
-    <script src="js/word-modal.js"></script>
+    var cache = {};
+    var bookSelect = document.getElementById('tsk-book');
+    var chapterInput = document.getElementById('tsk-chapter');
+    var goBtn = document.getElementById('tsk-go');
+    var resultsDiv = document.getElementById('tsk-results');
+    var chaptersDiv = document.getElementById('tsk-chapters');
+
+    // Map folder names to display names for verse links
+    var FOLDER_TO_NAME = {
+        genesis:'Genesis', exodus:'Exodus', leviticus:'Leviticus',
+        numbers:'Numbers', deuteronomy:'Deuteronomy', joshua:'Joshua',
+        judges:'Judges', ruth:'Ruth', i_samuel:'1 Samuel',
+        ii_samuel:'2 Samuel', i_kings:'1 Kings', ii_kings:'2 Kings',
+        i_chronicles:'1 Chronicles', ii_chronicles:'2 Chronicles',
+        ezra:'Ezra', nehemiah:'Nehemiah', esther:'Esther', job:'Job',
+        psalms:'Psalms', proverbs:'Proverbs', ecclesiastes:'Ecclesiastes',
+        song_of_songs:'Song of Songs', isaiah:'Isaiah', jeremiah:'Jeremiah',
+        lamentations:'Lamentations', ezekiel:'Ezekiel', daniel:'Daniel',
+        hosea:'Hosea', joel:'Joel', amos:'Amos', obadiah:'Obadiah',
+        jonah:'Jonah', micah:'Micah', nahum:'Nahum', habakkuk:'Habakkuk',
+        zephaniah:'Zephaniah', haggai:'Haggai', zechariah:'Zechariah',
+        malachi:'Malachi', matthew:'Matthew', mark:'Mark', luke:'Luke',
+        john:'John', acts:'Acts', romans:'Romans',
+        '1_corinthians':'1 Corinthians', '2_corinthians':'2 Corinthians',
+        galatians:'Galatians', ephesians:'Ephesians',
+        philippians:'Philippians', colossians:'Colossians',
+        '1_thessalonians':'1 Thessalonians', '2_thessalonians':'2 Thessalonians',
+        '1_timothy':'1 Timothy', '2_timothy':'2 Timothy', titus:'Titus',
+        philemon:'Philemon', hebrews:'Hebrews', james:'James',
+        '1_peter':'1 Peter', '2_peter':'2 Peter', '1_john':'1 John',
+        '2_john':'2 John', '3_john':'3 John', jude:'Jude',
+        revelation:'Revelation'
+    };
+
+    // Ref name -> link to chapter page
+    function refToLink(refText) {
+        // "Genesis 1:1" -> "genesis/1.html"
+        // "1 Corinthians 15:3" -> "1_corinthians/15.html"
+        var m = refText.match(/^(.+?)\s+(\d+):(.+)$/);
+        if (!m) return null;
+        var name = m[1], ch = m[2];
+        // Reverse lookup folder from display name
+        for (var folder in FOLDER_TO_NAME) {
+            if (FOLDER_TO_NAME[folder] === name) {
+                return folder + '/' + ch + '.html';
+            }
+        }
+        return null;
+    }
+
+    function loadBook(folder, callback) {
+        if (cache[folder]) { callback(cache[folder]); return; }
+        resultsDiv.innerHTML = '<div class="tsk-loading">Loading cross-references...</div>';
+        fetch('data/tsk/' + folder + '.json')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                cache[folder] = data;
+                callback(data);
+            })
+            .catch(function() {
+                resultsDiv.innerHTML = '<div class="tsk-loading">No cross-reference data found for this book.</div>';
+            });
+    }
+
+    function showChapterNav(data, currentCh) {
+        var chapters = Object.keys(data).sort(function(a,b) { return parseInt(a) - parseInt(b); });
+        chaptersDiv.innerHTML = '';
+        chapters.forEach(function(ch) {
+            var btn = document.createElement('button');
+            btn.className = 'tsk-ch-btn' + (ch === String(currentCh) ? ' active' : '');
+            btn.textContent = ch;
+            btn.addEventListener('click', function() {
+                chapterInput.value = ch;
+                showChapter(data, ch);
+            });
+            chaptersDiv.appendChild(btn);
+        });
+    }
+
+    function showChapter(data, ch) {
+        var folder = bookSelect.value;
+        var bookName = FOLDER_TO_NAME[folder] || folder;
+        var chData = data[String(ch)];
+
+        // Update active chapter button
+        var btns = chaptersDiv.querySelectorAll('.tsk-ch-btn');
+        btns.forEach(function(b) {
+            b.classList.toggle('active', b.textContent === String(ch));
+        });
+
+        if (!chData) {
+            resultsDiv.innerHTML = '<div class="tsk-loading">No cross-references for ' + bookName + ' ' + ch + '.</div>';
+            return;
+        }
+
+        var verses = Object.keys(chData).sort(function(a,b) { return parseInt(a) - parseInt(b); });
+        var html = '';
+        var totalRefs = 0;
+
+        verses.forEach(function(vs) {
+            var refs = chData[vs];
+            totalRefs += refs.length;
+            var verseRef = bookName + ' ' + ch + ':' + vs;
+            var verseLink = refToLink(verseRef);
+
+            html += '<div class="tsk-verse-block">';
+            html += '<div class="tsk-verse-ref">';
+            if (verseLink) {
+                html += '<a href="' + verseLink + '" style="color:#d4af37;text-decoration:none">' + verseRef + '</a>';
+            } else {
+                html += verseRef;
+            }
+            html += '<span class="tsk-ref-count">(' + refs.length + ' refs)</span>';
+            html += '</div>';
+            html += '<ul class="tsk-ref-list">';
+
+            refs.forEach(function(r) {
+                var link = refToLink(r.ref);
+                html += '<li class="tsk-ref-item">';
+                if (link) {
+                    html += '<a class="tsk-ref-link" href="' + link + '">' + r.ref + '</a>';
+                } else {
+                    html += '<span class="tsk-ref-link">' + r.ref + '</span>';
+                }
+                if (r.v > 0) {
+                    html += '<span class="tsk-votes">' + r.v + ' votes</span>';
+                }
+                html += '</li>';
+            });
+
+            html += '</ul></div>';
+        });
+
+        resultsDiv.innerHTML = '<div style="color:#806030;margin-bottom:15px;font-size:13px">' +
+            bookName + ' ' + ch + ' — ' + verses.length + ' verses, ' + totalRefs + ' cross-references</div>' + html;
+    }
+
+    function doSearch() {
+        var folder = bookSelect.value;
+        var ch = chapterInput.value;
+        loadBook(folder, function(data) {
+            showChapterNav(data, ch);
+            showChapter(data, ch);
+        });
+    }
+
+    goBtn.addEventListener('click', doSearch);
+    chapterInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') doSearch();
+    });
+
+    // Load Genesis 1 on page load
+    doSearch();
+})();
+</script>
+
     <script src="js/site-header.js"></script>
     <script src="js/site-footer.js"></script>
 </body>
