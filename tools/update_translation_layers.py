@@ -4,8 +4,8 @@ UPDATE TRANSLATION LAYERS - Mechanical Bible
 =============================================
 Across all chapter HTML files:
 1. Add <script src="../js/translation-toggle.js"></script> before site-footer.js
-2. Add empty <span class="rosetta"></span> inside each .translation div
-   (the JS will populate rosetta + convert JPS to toggle at runtime)
+2. Add empty <span class="oracle"></span> inside each .translation div
+   (the JS will populate oracle + convert JPS to toggle at runtime)
 
 MECH and RMT spans stay baked. JPS span stays in HTML but JS converts it
 to toggle-translation class at runtime and caches the text.
@@ -55,12 +55,12 @@ def process_file(filepath):
                 '<script src="../js/translation-toggle.js"></script>\n</body>'
             )
 
-    # 2. Add empty rosetta span inside each .translation div if not present
-    # Insert before the .jps span (so order is: rmt, mechanical, rosetta, jps)
-    if '<span class="rosetta">' not in content:
+    # 2. Add empty oracle span inside each .translation div if not present
+    # Insert before the .jps span (so order is: rmt, mechanical, oracle, jps)
+    if '<span class="oracle">' not in content:
         content = content.replace(
             '<span class="jps">',
-            '<span class="rosetta"></span><span class="jps">'
+            '<span class="oracle"></span><span class="jps">'
         )
 
     if content != original:

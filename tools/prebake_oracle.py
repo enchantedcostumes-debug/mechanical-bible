@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PRE-BAKE ROSETTA DATA - Mechanical Bible
+PRE-BAKE ORACLE DATA - Mechanical Bible
 ==========================================
 Pairs each Hebrew word with its English definition from words.json
 (58,443 entries with definitions, mechanical translations, Strong's numbers).
@@ -9,7 +9,7 @@ Source data:
   - words.json:  C:\mechanical-bible\words.json (the master word dictionary)
   - Verses CSV:  C:\flask-structural-api\...\tanakh_COMPLETE_verses.csv
 
-Output: data/rosetta/<book>.json
+Output: data/oracle/<book>.json
   { "1": { "1": { "text": "בראשית(In the summit) ברא(Shape) ...", "g": 2701, "dr": 1 } } }
 
 Copyright (c) 2026 Tammy L Casey. All rights reserved.
@@ -24,8 +24,8 @@ from collections import defaultdict
 BASE_DIR = Path(__file__).parent.parent
 WORDS_JSON = BASE_DIR / 'words.json'
 FLASK_DIR = Path(r'C:\flask-structural-api')
-VERSES_CSV = FLASK_DIR / 'services' / 'rosetta_stone' / 'data' / 'tanakh_COMPLETE_verses.csv'
-OUTPUT_DIR = BASE_DIR / 'data' / 'rosetta'
+VERSES_CSV = FLASK_DIR / 'services' / 'oracle_stone' / 'data' / 'tanakh_COMPLETE_verses.csv'
+OUTPUT_DIR = BASE_DIR / 'data' / 'oracle'
 
 # Map CSV book names to folder names
 CSV_TO_FOLDER = {
@@ -112,7 +112,7 @@ def main():
             # Split Hebrew verse into words
             heb_words = hebrew_text.split()
 
-            # Build rosetta pairs
+            # Build oracle pairs
             pairs = []
             for hw in heb_words:
                 entry = words.get(hw)
@@ -149,6 +149,6 @@ def main():
 
 if __name__ == '__main__':
     print('=' * 60)
-    print('PRE-BAKE ROSETTA DATA - Mechanical Bible')
+    print('PRE-BAKE ORACLE DATA - Mechanical Bible')
     print('=' * 60)
     main()

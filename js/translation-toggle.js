@@ -4,7 +4,7 @@
  * Manages dynamic translation layers:
  *   Layer 1: MECH (baked in HTML)
  *   Layer 2: RMT (baked in HTML)
- *   Layer 3: ROSETTA (loaded from data/rosetta/<book>.json)
+ *   Layer 3: ORACLE (loaded from data/oracle/<book>.json)
  *   Layer 4: TOGGLE (user picks: JPS default, KJV, WEB, ASV, etc. via bible-api.com)
  *
  * Copyright (c) 2026 Tammy L Casey. All rights reserved.
@@ -26,8 +26,8 @@
 
     // JPS text cache (extracted from baked HTML before converting)
     const jpsCache = {};
-    // Rosetta data cache per book
-    const rosettaCache = {};
+    // Oracle data cache per book
+    const oracleCache = {};
     // Toggle translation cache
     const toggleCache = {};
 
@@ -100,19 +100,19 @@
             span.setAttribute('data-label', 'JPS: ');
         });
 
-        // 3. Load Rosetta data and inject
-        loadRosetta();
+        // 3. Load Oracle data and inject
+        loadOracle();
 
         // 4. Build toggle dropdown in toolbar
         buildSelector();
     }
 
-    function loadRosetta() {
-        var url = BASE + 'data/rosetta/' + bookFolder + '.json';
+    function loadOracle() {
+        var url = BASE + 'data/oracle/' + bookFolder + '.json';
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                rosettaCache[bookFolder] = data;
+                oracleCache[bookFolder] = data;
                 var chData = data[String(chapterNum)];
                 if (!chData) return;
 
@@ -123,11 +123,11 @@
                     var vd = chData[vnum];
                     if (!vd) return;
 
-                    // Check if rosetta span already exists
-                    var rs = div.querySelector('.rosetta');
+                    // Check if oracle span already exists
+                    var rs = div.querySelector('.oracle');
                     if (!rs) {
                         rs = document.createElement('span');
-                        rs.className = 'rosetta';
+                        rs.className = 'oracle';
                         // Insert before toggle-translation
                         var toggle = div.querySelector('.toggle-translation');
                         if (toggle) {
@@ -140,7 +140,7 @@
                 });
             })
             .catch(function() {
-                // Rosetta data not available for this book (e.g. NT books)
+                // Oracle data not available for this book (e.g. NT books)
             });
     }
 
