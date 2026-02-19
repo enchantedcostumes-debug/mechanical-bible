@@ -24,7 +24,7 @@ from collections import defaultdict
 BASE_DIR = Path(__file__).parent.parent
 WORDS_JSON = BASE_DIR / 'words.json'
 FLASK_DIR = Path(r'C:\flask-structural-api')
-VERSES_CSV = FLASK_DIR / 'services' / 'oracle_stone' / 'data' / 'tanakh_COMPLETE_verses.csv'
+VERSES_CSV = FLASK_DIR / 'services' / 'rosetta_stone' / 'data' / 'tanakh_COMPLETE_verses.csv'
 OUTPUT_DIR = BASE_DIR / 'data' / 'oracle'
 
 # Map CSV book names to folder names
