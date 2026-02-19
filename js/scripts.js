@@ -10,7 +10,7 @@
     'use strict';
 
     // Version string for cache-busting (change this ONE place to bust cache everywhere)
-    var V = '20260219d';
+    var V = '20260219h';
 
     // Find our own script tag to determine base path
     // If loaded as "../js/scripts.js", base is "../js/"
@@ -38,11 +38,13 @@
         'interlinear.js',
         'parallel-view.js',
         'grammar-view.js',
+        'translation-click.js',
         'search.js'
     ];
 
-    // Non-chapter pages: just header + footer
+    // Non-chapter pages: header + footer + word modal (for names page, etc.)
     var defaultScripts = [
+        'word-modal.js',
         'site-header.js',
         'site-footer.js'
     ];

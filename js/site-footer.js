@@ -3,7 +3,7 @@
  * Injected dynamically on all pages
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     // Create footer element
     const footer = document.createElement('footer');
     footer.className = 'site-footer';
@@ -23,4 +23,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Append to body
     document.body.appendChild(footer);
-});
+})();

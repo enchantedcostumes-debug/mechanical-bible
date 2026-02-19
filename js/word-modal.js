@@ -654,7 +654,7 @@ function buildWordHTML(word) {
 
             letterRows += `
                 <tr>
-                    <td style="font-size:1.5rem">${char}</td>
+                    <td>${char}</td>
                     <td>${name}</td>
                     <td>${value}</td>
                     <td>${pictograph}</td>

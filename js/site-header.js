@@ -3,7 +3,7 @@
  * Injected dynamically on all pages
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     // Create header element
     const header = document.createElement('header');
     header.className = 'site-header';
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <a href="/search.html">Search</a>
                 <a href="/tsk.html">Cross-References</a>
                 <a href="/names.html">Names</a>
+                <a href="/donate.html">Support</a>
                 <a href="https://ozark-oracle.com/" target="_blank" class="red-letter">Apokalypsis</a>
             </nav>
             <button class="mobile-menu-toggle" aria-label="Toggle menu">
@@ -53,4 +54,4 @@ document.addEventListener('DOMContentLoaded', function() {
             link.classList.add('active');
         }
     });
-});
+})();
