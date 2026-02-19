@@ -43,6 +43,11 @@ const WORD_MODAL_BASE = (function() {
 // ============================================================================
 
 let wordData = null;
+// Expose to window for grammar-view.js access
+Object.defineProperty(window, 'wordData', {
+    get() { return wordData; },
+    configurable: true
+});
 let hebrewDefs = null;  // Hebrew definitions keyed by Hebrew word
 let greekMapping = null; // Hebrew to Greek Septuagint mapping
 let timelineData = null; // Separate timeline data for all 58,400 words
