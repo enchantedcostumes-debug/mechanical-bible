@@ -82,26 +82,55 @@ def load_words():
     return words
 
 
+# Pictographic letter description words — if a definition starts with these
+# followed by commas, it's letter-by-letter pictographic, not a real definition
+LETTER_PIC_WORDS = {'strength', 'hand', 'nail', 'mark', 'staff', 'window', 'house',
+                    'teeth', 'water', 'head', 'eye', 'mouth', 'seed', 'palm',
+                    'fence', 'door', 'basket', 'ox', 'foot', 'sun', 'cross',
+                    'side', 'thorn', 'snake'}
+
+
+def is_pictographic(defn):
+    """Check if a definition is just pictographic letter descriptions."""
+    if not defn:
+        return True
+    first_word = defn.split(',')[0].split(' ')[0].lower().strip()
+    return first_word in LETTER_PIC_WORDS and ', ' in defn[:40]
+
+
+def has_real_definition(entry):
+    """Check if a word entry has a real (non-pictographic) definition."""
+    if not entry:
+        return False
+    if entry.get('mechanical_translation') or entry.get('rmt_translation'):
+        return True
+    defn = entry.get('definition', '')
+    if not defn:
+        return False
+    if defn.startswith('[From pictographs'):
+        return False
+    if is_pictographic(defn):
+        return False
+    if '[Direct object marker]' in defn or '[Object marker]' in defn:
+        return True  # AT marker is valid
+    return True
+
+
 def get_mechanical(word, entry):
     """Get mechanical translation for a word."""
-    # Check if we already have one
     mech = entry.get('mechanical_translation', '')
     if mech:
         return mech
 
-    # Build from definition
     defn = entry.get('definition', '')
-    if not defn:
+    if not defn or is_pictographic(defn):
         return word
 
-    # Extract the first key term (before colon or period)
     short = defn.split(':')[0].strip()
-    if short.startswith('I. '):
-        short = short[3:]
-    if short.startswith('II. '):
-        short = short[4:]
-    if short.startswith('And ') or short.startswith('The ') or short.startswith('In ') or short.startswith('To ') or short.startswith('From ') or short.startswith('Like '):
-        # Has prefix in definition
+    for prefix in ('I. ', 'II. ', 'III. '):
+        if short.startswith(prefix):
+            short = short[len(prefix):]
+    if short.startswith(('And ', 'The ', 'In ', 'To ', 'From ', 'Like ')):
         parts = short.split(' ', 1)
         prefix = parts[0].lower()
         rest = parts[1] if len(parts) > 1 else ''
@@ -112,72 +141,147 @@ def get_mechanical(word, entry):
 
 def get_rmt(word, entry):
     """Get RMT (natural English) translation for a word."""
-    # Check if we already have one
     rmt = entry.get('rmt_translation', '')
     if rmt and rmt != '~':
         return rmt
     if rmt == '~':
-        return ''  # Invisible particle
+        return ''
 
-    # Build from definition
     defn = entry.get('definition', '')
     if not defn:
         return ''
 
-    # For direct object marker, skip
     if '[Direct object marker]' in defn or '[Object marker]' in defn:
         return ''
 
-    # SKIP pictographic letter-by-letter descriptions
-    # These look like: "strength, power, leader" or "Hand, arm, deed Mark, sign, cross"
-    # or "Nail, peg, hook Hand, arm, deed..."
-    letter_pic_words = {'strength', 'hand', 'nail', 'mark', 'staff', 'window', 'house',
-                        'teeth', 'water', 'head', 'eye', 'mouth', 'seed', 'palm',
-                        'fence', 'door', 'basket', 'ox', 'foot', 'sun', 'cross',
-                        'side', 'thorn', 'snake'}
-    first_word = defn.split(',')[0].split(' ')[0].lower().strip()
-    if first_word in letter_pic_words and ', ' in defn[:40]:
-        # This is a pictographic description, not a real definition
-        # Try to extract SOMETHING useful from it
-        # Check if there's a prefix (And, In, To, etc.) before the pictographic part
-        prefix_match = re.match(r'^(And|In|To|From|Like|The|That)\s+', defn)
-        if prefix_match:
-            return prefix_match.group(1).lower()
+    if is_pictographic(defn):
         return ''
 
-    # Handle prefix-composed definitions like "And the Land: ..."
-    # or "To the Light: ..."
+    # Handle prefix-composed definitions
     prefix_match = re.match(r'^(And the|And to|And in|And from|And|In the|In|To the|To|From the|From|Like|The|That)\s+(.+?)(?::|\.|\s*$)', defn)
     if prefix_match:
         prefix = prefix_match.group(1).lower()
         rest = prefix_match.group(2).strip()
-        # Get just the first word of rest
         rest_word = rest.split(':')[0].split('.')[0].split(',')[0].strip().lower()
-        if rest_word and rest_word not in letter_pic_words:
+        if rest_word and rest_word not in LETTER_PIC_WORDS:
             return f'{prefix} {rest_word}'
         return prefix
 
-    # Extract the first meaning
     short = defn.split(':')[0].strip()
-    if short.startswith('I. '):
-        short = short[3:]
-    if short.startswith('II. '):
-        short = short[4:]
-    if short.startswith('III. '):
-        short = short[5:]
+    for prefix in ('I. ', 'II. ', 'III. '):
+        if short.startswith(prefix):
+            short = short[len(prefix):]
 
-    # Clean up
     short = short.replace('[', '').replace(']', '').strip()
-
-    # If it's still a pictographic description, return empty
-    if short and short.split(',')[0].split(' ')[0].lower() in letter_pic_words:
+    if short and short.split(',')[0].split(' ')[0].lower() in LETTER_PIC_WORDS:
         return ''
 
-    # Cap length
     if len(short) > 30:
         short = short.split(' ')[0]
 
     return short.lower()
+
+
+def decompose_compound(word, words_dict):
+    """Decompose a compound Hebrew word into translatable parts.
+
+    Hebrew tokens in the HTML can be compound words like:
+    - אלהיםליבשה = אלהים + ל + יבשה (Elohiym + to + dry ground)
+    - ויהיכן = ו + יהי + כן (and + existed + so)
+    - אתהמים = את + ה + מים (AT + the + waters)
+
+    Returns list of (hebrew_part, entry) tuples.
+    """
+    # Try known prefixes first (longest match first)
+    prefixes_sorted = sorted(PREFIX_RMT.keys(), key=len, reverse=True)
+
+    # Strategy 1: Try splitting at every position to find two known words
+    for split_pos in range(1, len(word)):
+        left = word[:split_pos]
+        right = word[split_pos:]
+
+        left_entry = words_dict.get(left, {})
+        right_entry = words_dict.get(right, {})
+
+        if has_real_definition(left_entry) and has_real_definition(right_entry):
+            return [(left, left_entry), (right, right_entry)]
+
+        # Try right side with prefix stripping
+        if has_real_definition(left_entry):
+            for pfx in prefixes_sorted:
+                if right.startswith(pfx) and len(right) > len(pfx):
+                    root = right[len(pfx):]
+                    root_entry = words_dict.get(root, {})
+                    if has_real_definition(root_entry):
+                        return [(left, left_entry), (right, words_dict.get(right, root_entry))]
+
+    # Strategy 2: Strip known prefix, then try to split remainder
+    for pfx in prefixes_sorted:
+        if word.startswith(pfx) and len(word) > len(pfx):
+            remainder = word[len(pfx):]
+            rem_entry = words_dict.get(remainder, {})
+            if has_real_definition(rem_entry):
+                return [('prefix:' + pfx, {}), (remainder, rem_entry)]
+
+            # Try splitting the remainder
+            for split_pos in range(1, len(remainder)):
+                left = remainder[:split_pos]
+                right = remainder[split_pos:]
+                left_entry = words_dict.get(left, {})
+                right_entry = words_dict.get(right, {})
+                if has_real_definition(left_entry) and has_real_definition(right_entry):
+                    return [('prefix:' + pfx, {}), (left, left_entry), (right, right_entry)]
+
+    # Strategy 3: Try three-part split (word1 + word2 + word3)
+    for i in range(1, len(word) - 1):
+        for j in range(i + 1, len(word)):
+            p1, p2, p3 = word[:i], word[i:j], word[j:]
+            e1 = words_dict.get(p1, {})
+            e2 = words_dict.get(p2, {})
+            e3 = words_dict.get(p3, {})
+            if has_real_definition(e1) and has_real_definition(e2) and has_real_definition(e3):
+                return [(p1, e1), (p2, e2), (p3, e3)]
+
+    return None  # Could not decompose
+
+
+def translate_word(hw, words_dict):
+    """Translate a single Hebrew word, decomposing compounds if needed.
+
+    Returns (mechanical, rmt) tuple.
+    """
+    entry = words_dict.get(hw, {})
+
+    # If we have a real definition, use it directly
+    if has_real_definition(entry):
+        return get_mechanical(hw, entry), get_rmt(hw, entry)
+
+    # Try to decompose compound word
+    parts = decompose_compound(hw, words_dict)
+    if parts:
+        mech_parts = []
+        rmt_parts = []
+        for part_hw, part_entry in parts:
+            if part_hw.startswith('prefix:'):
+                pfx = part_hw[7:]
+                mech_parts.append(PREFIX_MECH.get(pfx, pfx + '~').rstrip('~'))
+                rmt_parts.append(PREFIX_RMT.get(pfx, pfx))
+            elif has_real_definition(part_entry):
+                m = get_mechanical(part_hw, part_entry)
+                r = get_rmt(part_hw, part_entry)
+                mech_parts.append(m)
+                if r:
+                    rmt_parts.append(r)
+            else:
+                mech_parts.append(part_hw)
+        return ' '.join(mech_parts), ' '.join(rmt_parts)
+
+    # Last resort: if entry exists but is pictographic, return empty
+    if entry:
+        return hw, ''
+
+    # Not in lexicon at all
+    return hw, ''
 
 
 def translate_verse(hebrew_words, words_dict):
@@ -186,17 +290,7 @@ def translate_verse(hebrew_words, words_dict):
     rmt_parts = []
 
     for hw in hebrew_words:
-        entry = words_dict.get(hw, {})
-
-        if not entry:
-            # Word not in lexicon at all
-            mech_parts.append(hw)
-            rmt_parts.append(f'[{hw}]')
-            continue
-
-        mech = get_mechanical(hw, entry)
-        rmt = get_rmt(hw, entry)
-
+        mech, rmt = translate_word(hw, words_dict)
         mech_parts.append(mech)
         if rmt:
             rmt_parts.append(rmt)
@@ -204,15 +298,12 @@ def translate_verse(hebrew_words, words_dict):
     mechanical = ' '.join(mech_parts)
     rmt_raw = ' '.join(rmt_parts)
 
-    # Clean up RMT: capitalize first word, fix spacing
+    # Clean up RMT
     rmt_clean = rmt_raw.strip()
     if rmt_clean:
         rmt_clean = rmt_clean[0].upper() + rmt_clean[1:]
-        # Fix double spaces
         rmt_clean = re.sub(r'\s+', ' ', rmt_clean)
-        # Fix "and and"
         rmt_clean = re.sub(r'\band and\b', 'and', rmt_clean)
-        # Add period if missing
         if rmt_clean and rmt_clean[-1] not in '.!?,;':
             rmt_clean += '.'
 
@@ -272,17 +363,31 @@ def process_html_file(filepath, words_dict, dry_run=False):
             continue
 
         old_translation_div = trans_match.group(0)
-        old_content = trans_match.group(2)
+        old_content = trans_match.group(2).strip()
+
+        # Extract existing JPS text (the original translation)
+        # If it already has <span class="rmt">, extract from jps span; otherwise use raw content
+        jps_match = re.search(r'<span class="jps"[^>]*>(.*?)</span>', old_content, re.DOTALL)
+        if jps_match:
+            jps_text = jps_match.group(1).strip()
+        else:
+            # Strip any existing rmt/mechanical spans to get raw JPS
+            jps_text = re.sub(r'<span class="(?:rmt|mechanical)"[^>]*>.*?</span>', '', old_content)
+            # Strip sup note-ref tags from JPS for clean extraction
+            jps_text = re.sub(r'<sup class="note-ref"[^>]*>.*?</sup>', '', jps_text)
+            jps_text = jps_text.strip()
+            # Clean ." artifacts
+            jps_text = jps_text.replace(' ."', '').replace('."', '').strip()
 
         # Preserve any sup note-ref tags
         sup_match = re.search(r'(<sup class="note-ref"[^>]*>.*?</sup>)', old_content)
         sup_tag = sup_match.group(1) if sup_match else ''
 
-        # Build new translation content
-        new_content = (
-            f'<span class="rmt">{rmt}</span>'
-            f'<span class="mechanical" style="display:none">{mechanical}</span>'
-        )
+        # Build new translation content with all three layers
+        new_content = f'<span class="rmt">{rmt}</span>'
+        new_content += f'<span class="mechanical" style="display:none">{mechanical}</span>'
+        if jps_text:
+            new_content += f'<span class="jps" style="display:none">{jps_text}</span>'
         if sup_tag:
             new_content += f' {sup_tag}'
 

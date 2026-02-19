@@ -184,21 +184,41 @@ nav a.active {
     font-family: 'SBL Greek', 'Gentium', 'Times New Roman', serif;
 }
 
-/* Clickable words */
+/* Clickable words - always show transliteration */
 .word {
     cursor: pointer;
-    padding: 5px 8px;
+    padding: 5px 8px 2px;
     border-radius: 4px;
     transition: all 0.2s ease;
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: top;
     margin: 3px;
     color: #c0a060;
+}
+
+.word::after {
+    content: attr(data-translit);
+    display: block;
+    font-size: 0.55em;
+    color: #806030;
+    font-style: italic;
+    font-family: 'Segoe UI', sans-serif;
+    direction: ltr;
+    line-height: 1.2;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
 }
 
 .word:hover {
     background: rgba(212,175,55,0.25);
     color: #d4af37;
     box-shadow: 0 0 10px rgba(212,175,55,0.3);
+}
+
+.word:hover::after {
+    color: #a08040;
 }
 
 /* Translation */
@@ -211,6 +231,64 @@ nav a.active {
     border-left: 4px solid #d4af37;
     color: #a08040;
     border-radius: 0 6px 6px 0;
+}
+
+/* RMT Translation Layer (natural English) */
+.translation .rmt {
+    display: block;
+    color: #c8a850;
+    font-size: 1em;
+    line-height: 1.8;
+}
+
+/* Mechanical Translation Layer (word-for-word with prefix notation) */
+.translation .mechanical {
+    display: none;
+    color: #8a7040;
+    font-size: 0.85em;
+    font-family: 'Courier New', monospace;
+    line-height: 1.6;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(212,175,55,0.15);
+}
+
+/* JPS Translation Layer (traditional English) */
+.translation .jps {
+    display: none;
+    color: #907850;
+    font-size: 0.95em;
+    font-style: italic;
+    line-height: 1.6;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(212,175,55,0.15);
+}
+
+/* Show all layers when toggled */
+.translation.show-layers .mechanical,
+.translation.show-layers .jps {
+    display: block;
+}
+.translation.show-layers .rmt::before {
+    content: 'RMT: ';
+    color: #d4af37;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.translation.show-layers .mechanical::before {
+    content: 'MECH: ';
+    color: #806030;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+.translation.show-layers .jps::before {
+    content: 'JPS: ';
+    color: #806030;
+    font-size: 0.85em;
+    font-weight: bold;
+    font-style: normal;
 }
 
 /* Info boxes */
@@ -1130,4 +1208,117 @@ body {
     .grammar-legend-item {
         font-size: 10px;
     }
+}
+
+
+/* ============================================================
+   SUPERSCRIPT NOTE REFERENCES
+   ============================================================ */
+
+.note-ref {
+    color: #d4af37;
+    cursor: pointer;
+    font-size: 0.7em;
+    vertical-align: super;
+    padding: 0 2px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.note-ref:hover {
+    color: #fff;
+    text-shadow: 0 0 8px rgba(212,175,55,0.6);
+}
+
+
+/* ============================================================
+   COLLAPSIBLE VERSE NOTES (footnotes + cross-refs wrapper)
+   ============================================================ */
+
+.verse-notes {
+    margin-top: 15px;
+    padding: 18px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    font-size: 0.9em;
+    border: 1px solid rgba(212,175,55,0.2);
+    animation: noteReveal 0.3s ease;
+}
+
+.verse-notes[hidden] {
+    display: none;
+}
+
+@keyframes noteReveal {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.verse-notes h4 {
+    color: #d4af37;
+    margin-bottom: 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Footnotes inside verse-notes */
+.footnotes {
+    margin-bottom: 15px;
+}
+
+.footnote {
+    margin: 10px 0;
+    padding-left: 20px;
+    border-left: 2px solid rgba(212,175,55,0.4);
+    color: #a08040;
+}
+
+.footnote-marker {
+    color: #d4af37;
+    font-weight: bold;
+}
+
+.footnote-alt {
+    color: #806030;
+    font-style: italic;
+}
+
+/* Cross-references inside verse-notes */
+.cross-refs {
+    margin-top: 10px;
+}
+
+.cross-refs ul {
+    list-style: none;
+    padding: 0;
+}
+
+.cross-refs li {
+    padding: 4px 0;
+    color: #a08040;
+    font-size: 0.9em;
+}
+
+.ref-verse {
+    color: #d4af37;
+    font-weight: 600;
+}
+
+.ref-topic {
+    color: #806030;
+    margin-left: 5px;
+}
+
+.theme-tag {
+    display: inline-block;
+    background: rgba(212,175,55,0.15);
+    color: #d4af37;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
 }
