@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="author" content="Tammy L Casey">
+    <meta name="copyright" content="Copyright 2026 Tammy L Casey. All rights reserved.">
+    <meta name="motto" content="Known by our fruits - not our roots">
+    <title id="page-title">Mechanical Bible</title>
+    <link rel="stylesheet" href="css/egyptian-theme.css">
+    <link rel="stylesheet" href="css/word-modal.css">
+</head>
+<body>
+<div class="container">
+    <h1 id="book-name">Loading...</h1>
+    <p class="subtitle" id="chapter-label"></p>
+    <nav>
+        <a href="index.html">Home</a>
+        <a id="chapters-link" href="#">Chapters</a>
+    </nav>
+    <div class="chapter-nav" id="chapter-nav"></div>
+    <div class="view-toolbar">
+        <button id="interlinear-toggle" onclick="toggleInterlinear()">Interlinear View</button>
+        <button id="parallel-toggle" onclick="toggleParallel()">Parallel View</button>
+        <button id="grammar-toggle" onclick="toggleGrammar()">Grammar View</button>
+        <button id="search-toggle" onclick="openSearch()">Search</button>
+    </div>
+    <div id="verses-container"></div>
+</div>
+<script src="js/scripts.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    var API = 'https://www.enchantedozarks.com/api/bible';
+
+    // Parse URL: chapter.html?book=exodus&ch=25
+    var params = new URLSearchParams(window.location.search);
+    var bookFolder = params.get('book') || '';
+    var chapter = parseInt(params.get('ch')) || 0;
+
+    if (!bookFolder || !chapter) {
+        document.getElementById('book-name').textContent = 'No book/chapter specified';
+        document.getElementById('chapter-label').textContent = 'Use: chapter.html?book=exodus&ch=25';
+        return;
+    }
+
+    // Set page title immediately
+    var bookDisplay = bookFolder.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    document.getElementById('page-title').textContent = bookDisplay + ' ' + chapter + ' - Mechanical Bible';
+    document.getElementById('book-name').textContent = bookDisplay;
+    document.getElementById('chapter-label').textContent = 'Chapter ' + chapter;
+    document.getElementById('chapters-link').href = bookFolder + '/index.html';
+
+    // Fetch chapter data from API
+    fetch(API + '/' + bookFolder + '/' + chapter)
+        .then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(function(data) {
+            // Update with actual book name from DB
+            document.getElementById('book-name').textContent = data.book;
+            document.getElementById('page-title').textContent = data.book + ' ' + chapter + ' - Mechanical Bible';
+
+            // Build chapter navigation
+            buildChapterNav(data.total_chapters, chapter, bookFolder);
+
+            // Build verses
+            buildVerses(data.verses, data.book, chapter);
+        })
+        .catch(function(err) {
+            document.getElementById('verses-container').innerHTML =
+                '<div class="verse"><div class="verse-ref">Error loading chapter</div>' +
+                '<div class="translation"><span class="rmt">' + err.message + '</span></div></div>';
+        });
+
+
+    function buildChapterNav(totalChapters, currentCh, folder) {
+        var nav = document.getElementById('chapter-nav');
+        var html = '';
+        for (var i = 1; i <= totalChapters; i++) {
+            var cls = (i === currentCh) ? ' class="active"' : '';
+            html += '<a href="chapter.html?book=' + folder + '&ch=' + i + '"' + cls + '>' + i + '</a>';
+        }
+        nav.innerHTML = html;
+    }
+
+
+    function buildVerses(verses, bookName, ch) {
+        var container = document.getElementById('verses-container');
+        var html = '';
+
+        for (var i = 0; i < verses.length; i++) {
+            var v = verses[i];
+            var vnum = v.verse;
+            var vid = 'v' + ch + '-' + vnum;
+
+            html += '<div class="verse" id="' + vid + '">';
+
+            // Verse reference + gematria
+            html += '<div class="verse-ref">' + bookName + ' ' + ch + ':' + vnum;
+            if (v.gematria) {
+                html += ' <span class="verse-gematria">Gematria: ' + v.gematria + '</span>';
+            }
+            html += '</div>';
+
+            // Hebrew text with clickable words
+            html += '<div class="original-text hebrew" lang="he" translate="no">';
+            if (v.words && v.words.length > 0) {
+                for (var w = 0; w < v.words.length; w++) {
+                    var word = v.words[w];
+                    html += '<span class="word" lang="he" translate="no" onclick="showWordEvolution(\'' +
+                            escapeHtml(word.hebrew) + '\')">' + escapeHtml(word.hebrew) + '</span> ';
+                }
+            } else if (v.hebrew) {
+                // Fallback: split hebrew text into words
+                var hwords = v.hebrew.split(' ');
+                for (var w = 0; w < hwords.length; w++) {
+                    if (hwords[w]) {
+                        html += '<span class="word" lang="he" translate="no" onclick="showWordEvolution(\'' +
+                                escapeHtml(hwords[w]) + '\')">' + escapeHtml(hwords[w]) + '</span> ';
+                    }
+                }
+            }
+            html += '</div>';
+
+            // Translation div - ORDER IS CORRECT: oracle, rmt, mechanical, toggle
+            html += '<div class="translation">';
+            html += '<span class="oracle">' + escapeHtml(v.oracle || '') + '</span>';
+            html += '<span class="rmt">' + escapeHtml(v.rmt || v.jps || '') + '</span>';
+            html += '<span class="mechanical">' + escapeHtml(v.mechanical || '') + '</span>';
+            html += '<span class="toggle-translation" data-label="JPS: ">' + escapeHtml(v.jps || '') + '</span>';
+            html += '</div>';
+
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+    }
+
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+})();
+</script>
+</body>
+</html>
