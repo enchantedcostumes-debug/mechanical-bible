@@ -24,7 +24,7 @@
             });
 
             // Process each translation span
-            var spans = verse.querySelectorAll('.translation .rmt, .translation .mechanical, .translation .jps');
+            var spans = verse.querySelectorAll('.translation .rmt, .translation .mechanical, .translation .jps, .translation .toggle-translation');
             spans.forEach(function(span) {
                 var text = span.textContent.trim();
                 if (!text) return;

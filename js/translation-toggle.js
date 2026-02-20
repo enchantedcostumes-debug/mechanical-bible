@@ -72,6 +72,25 @@
         '3_john': '3john', 'jude': 'jude', 'revelation': 'revelation'
     };
 
+    // Normalize HTML folder names (i_samuel etc.) to canonical names
+    const FOLDER_NORMALIZE = {
+        'i_samuel': '1_samuel', 'ii_samuel': '2_samuel',
+        'i_kings': '1_kings', 'ii_kings': '2_kings',
+        'i_chronicles': '1_chronicles', 'ii_chronicles': '2_chronicles'
+    };
+
+    // NT book set for OT/NT detection
+    const NT_BOOKS = new Set([
+        'matthew', 'mark', 'luke', 'john', 'acts', 'romans',
+        '1_corinthians', '2_corinthians', 'galatians', 'ephesians',
+        'philippians', 'colossians', '1_thessalonians', '2_thessalonians',
+        '1_timothy', '2_timothy', 'titus', 'philemon',
+        'hebrews', 'james', '1_peter', '2_peter',
+        '1_john', '2_john', '3_john', 'jude', 'revelation'
+    ]);
+
+    let isNT = false;
+
     function init() {
         // Detect book folder and chapter from URL path
         const path = window.location.pathname;
@@ -85,26 +104,52 @@
 
         if (!bookFolder || !chapterNum) return;
 
-        // 1. Extract JPS text from baked spans, cache it
-        document.querySelectorAll('.translation .jps').forEach(function(span) {
-            var verse = span.closest('.verse');
-            if (verse) {
-                var vnum = verse.id.replace(/^v\d+-/, '');
-                jpsCache[vnum] = span.textContent.replace(/^\.?"?\s*/, '').trim();
-            }
-        });
+        // Normalize folder names (i_samuel → 1_samuel, etc.)
+        bookFolder = FOLDER_NORMALIZE[bookFolder] || bookFolder;
 
-        // 2. Convert JPS spans to toggle-translation spans
-        document.querySelectorAll('.translation .jps').forEach(function(span) {
-            span.className = 'toggle-translation';
-            span.setAttribute('data-label', 'JPS: ');
-        });
+        // Detect OT vs NT
+        isNT = NT_BOOKS.has(bookFolder);
 
-        // 3. Load Oracle data and inject
-        loadOracle();
+        // 1. Handle toggle-translation spans
+        var jpsSpans = document.querySelectorAll('.translation .jps');
 
-        // 4. Build toggle dropdown in toolbar
+        if (jpsSpans.length > 0) {
+            // OT path: extract JPS text from baked spans, cache it
+            jpsSpans.forEach(function(span) {
+                var verse = span.closest('.verse');
+                if (verse) {
+                    var vnum = verse.id.replace(/^v\d+-/, '');
+                    jpsCache[vnum] = span.textContent.replace(/^\.?"?\s*/, '').trim();
+                }
+            });
+            // Convert JPS spans to toggle-translation spans
+            jpsSpans.forEach(function(span) {
+                span.className = 'toggle-translation';
+                span.setAttribute('data-label', 'JPS: ');
+            });
+        } else {
+            // NT path: create toggle-translation spans (no JPS text exists)
+            document.querySelectorAll('.translation').forEach(function(div) {
+                var span = document.createElement('span');
+                span.className = 'toggle-translation';
+                span.setAttribute('data-label', 'KJV: ');
+                span.textContent = '';
+                div.appendChild(span);
+            });
+        }
+
+        // 2. Load Oracle data (OT only — no NT oracle files exist)
+        if (!isNT) {
+            loadOracle();
+        }
+
+        // 3. Build toggle dropdown in toolbar
         buildSelector();
+
+        // 4. NT pages: auto-fetch default translation (KJV)
+        if (isNT) {
+            switchToggle('kjv');
+        }
     }
 
     function loadOracle() {
@@ -150,11 +195,12 @@
         var sel = document.createElement('select');
         sel.id = 'translationSelect';
 
+        var defaultId = isNT ? 'kjv' : 'jps';
         TRANSLATIONS.forEach(function(t) {
             var opt = document.createElement('option');
             opt.value = t.id;
             opt.textContent = t.name;
-            if (t.id === 'jps') opt.selected = true;
+            if (t.id === defaultId) opt.selected = true;
             sel.appendChild(opt);
         });
 
@@ -177,8 +223,8 @@
             span.textContent = 'Loading...';
         });
 
-        // JPS from cache
-        if (translationId === 'jps') {
+        // JPS from cache (OT only — NT has no baked JPS, falls through to API)
+        if (translationId === 'jps' && !isNT) {
             document.querySelectorAll('.toggle-translation').forEach(function(span) {
                 var verse = span.closest('.verse');
                 if (verse) {
