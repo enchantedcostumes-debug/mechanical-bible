@@ -4,8 +4,11 @@
  */
 
 (function() {
+    // Skip injection if footer already exists in the HTML
+    if (document.querySelector('footer.site-footer')) return;
+
     // Create footer element
-    const footer = document.createElement('footer');
+    var footer = document.createElement('footer');
     footer.className = 'site-footer';
     footer.innerHTML = `
         <div class="site-footer-inner">
