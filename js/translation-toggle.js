@@ -168,14 +168,13 @@
                     var vd = chData[vnum];
                     if (!vd) return;
 
-                    // Get or create oracle span, then MOVE it to first position
+                    // Populate existing oracle span (CSS order handles display position)
                     var rs = div.querySelector('.oracle');
                     if (!rs) {
                         rs = document.createElement('span');
                         rs.className = 'oracle';
+                        div.appendChild(rs);
                     }
-                    // Always insert as FIRST child (moves existing or places new)
-                    div.insertBefore(rs, div.firstChild);
                     rs.textContent = vd.text || '';
                 });
             })
