@@ -4,9 +4,6 @@
  */
 
 (function() {
-    // Skip injection if footer already exists in the HTML
-    if (document.querySelector('footer.site-footer')) return;
-
     // Create footer element
     var footer = document.createElement('footer');
     footer.className = 'site-footer';
