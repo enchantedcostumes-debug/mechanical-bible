@@ -190,7 +190,7 @@
         var div = document.createElement('div');
         div.className = 'translation-selector';
         var lbl = document.createElement('label');
-        lbl.textContent = '5th:';
+        lbl.textContent = 'Translation:';
         var sel = document.createElement('select');
         sel.id = 'translationSelect';
 
