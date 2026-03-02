@@ -13,15 +13,19 @@
 (function() {
     'use strict';
 
-    // Available toggle translations
+    // Available toggle translations (all English - via bible-api.com)
     const TRANSLATIONS = [
-        { id: 'jps',   label: 'JPS: ',   name: 'Jewish Publication Society' },
-        { id: 'kjv',   label: 'KJV: ',   name: 'King James Version' },
-        { id: 'web',   label: 'WEB: ',   name: 'World English Bible' },
-        { id: 'bbe',   label: 'BBE: ',   name: 'Bible in Basic English' },
-        { id: 'darby', label: 'DARBY: ', name: 'Darby Translation' },
-        { id: 'ylt',   label: 'YLT: ',   name: "Young's Literal Translation" },
-        { id: 'asv',   label: 'ASV: ',   name: 'American Standard Version' }
+        { id: 'jps',    label: 'JPS: ',    name: 'Jewish Publication Society' },
+        { id: 'kjv',    label: 'KJV: ',    name: 'King James Version' },
+        { id: 'asv',    label: 'ASV: ',    name: 'American Standard Version' },
+        { id: 'web',    label: 'WEB: ',    name: 'World English Bible' },
+        { id: 'webbe',  label: 'WEBBE: ',  name: 'World English Bible (British)' },
+        { id: 'bbe',    label: 'BBE: ',    name: 'Bible in Basic English' },
+        { id: 'dra',    label: 'DRA: ',    name: 'Douay-Rheims 1899' },
+        { id: 'darby',  label: 'DARBY: ',  name: 'Darby Translation' },
+        { id: 'ylt',    label: 'YLT: ',    name: "Young's Literal Translation" },
+        { id: 'oeb-us', label: 'OEB: ',    name: 'Open English Bible (US)' },
+        { id: 'oeb-cw', label: 'OEB-CW: ', name: 'Open English Bible (Commonwealth)' }
     ];
 
     // JPS text cache (extracted from baked HTML before converting)
