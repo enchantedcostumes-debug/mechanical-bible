@@ -484,7 +484,7 @@ function buildTimelineStages(word, pictographic, septuagintDisplay, ntGreekDispl
         const getPeriod = (s, def) => s.period || s.p || def;
         const getText = (s, def) => s.text || s.t || def;
         const getMeaning = (s, def) => s.meaning || s.m || def;
-        const getDebate = (s) => s.scholarly_debate || s.d || s.mechanism || '';
+        const getDebate = (s) => s.scholarly_debate || s.d || s.corruption || s.mechanism || '';
         const getTranslit = (s) => s.transliteration || s.tr || '';
 
         // Use detailed corruption timeline
@@ -722,10 +722,20 @@ function buildWordHTML(word) {
     const timeline = word.timeline || {};
     const greek = lookupGreek(word.hebrew);
 
-    // Build Septuagint display
+    // Also check timelines.json (has 46,059 corruption chain entries)
+    const chainTimeline = getTimelineForWord(word.hebrew);
+    const chainS2 = chainTimeline?.stage_2 || {};
+    const chainS3 = chainTimeline?.stage_3 || {};
+    const chainS4 = chainTimeline?.stage_4 || {};
+    const chainS5 = chainTimeline?.stage_5 || {};
+    const chainS6 = chainTimeline?.stage_6 || {};
+
+    // Build Septuagint display - check all sources
     let septuagintDisplay = timeline.septuagint || '';
     if (greek) {
         septuagintDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit}) - "${greek.meaning}"`;
+    } else if (!septuagintDisplay && chainS2.text) {
+        septuagintDisplay = chainS2.text;
     } else if (!septuagintDisplay) {
         septuagintDisplay = '(Research in progress)';
     }
@@ -734,15 +744,17 @@ function buildWordHTML(word) {
     let ntGreekDisplay = timeline.nt_greek || '';
     if (greek && !ntGreekDisplay) {
         ntGreekDisplay = `<span class="greek-word">${greek.greek}</span> (${greek.translit})`;
+    } else if (!ntGreekDisplay && chainS3.text) {
+        ntGreekDisplay = chainS3.text;
     } else if (!ntGreekDisplay) {
         ntGreekDisplay = '(Research in progress)';
     }
 
     // Latin Vulgate
-    const vulgateDisplay = def?.vulgate_translation || timeline.vulgate || '(Research in progress)';
+    const vulgateDisplay = def?.vulgate_translation || timeline.vulgate || chainS4.text || '(Research in progress)';
 
     // KJV
-    const kjvDisplay = def?.kjv_translation || timeline.kjv || '(Research in progress)';
+    const kjvDisplay = def?.kjv_translation || timeline.kjv || chainS5.text || '(Research in progress)';
 
     // Pictographic meaning - prefer from definitions if available
     const pictographic = def?.pictographic_meaning || word.pictographic || '';
