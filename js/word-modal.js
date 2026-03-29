@@ -315,9 +315,62 @@ function getTimelineForWord(hebrew) {
         return word.corruption_timeline;
     }
 
-    // Then check separate timelines data
-    if (timelineData?.[hebrew]) {
+    if (!timelineData) return null;
+
+    // Exact match
+    if (timelineData[hebrew]) {
         return timelineData[hebrew];
+    }
+
+    // Strip single prefix (ה, ב, כ, ל, מ, ו, ש, י, ת, א, נ)
+    const allPrefixes = ['ה', 'ב', 'כ', 'ל', 'מ', 'ו', 'ש', 'י', 'ת', 'א', 'נ'];
+    for (const p of allPrefixes) {
+        if (hebrew.startsWith(p) && hebrew.length > 2) {
+            const stripped = hebrew.substring(1);
+            if (timelineData[stripped]) return timelineData[stripped];
+        }
+    }
+
+    // Strip two-char prefixes (וי, וה, וב, ול, ומ, בה, לה, מה, על)
+    const twoPrefixes = ['וי', 'ות', 'וא', 'ונ', 'וה', 'וב', 'ול', 'ומ', 'וכ', 'וש', 'בה', 'לה', 'מה', 'כה', 'על'];
+    for (const p of twoPrefixes) {
+        if (hebrew.startsWith(p) && hebrew.length > p.length + 1) {
+            const stripped = hebrew.substring(p.length);
+            if (timelineData[stripped]) return timelineData[stripped];
+        }
+    }
+
+    // Strip common suffixes (ים, ות, הם, כם, נו, יו, יך, ו, ה, ת, י, ך)
+    const suffixes = ['יהם', 'יהן', 'ים', 'ות', 'הם', 'הן', 'כם', 'נו', 'ני', 'יו', 'יך', 'יה', 'ו', 'ה', 'ת', 'י', 'ך', 'ם'];
+    for (const s of suffixes) {
+        if (hebrew.endsWith(s) && hebrew.length > s.length + 1) {
+            const stripped = hebrew.substring(0, hebrew.length - s.length);
+            if (timelineData[stripped]) return timelineData[stripped];
+        }
+    }
+
+    // Prefix + suffix combo
+    for (const p of allPrefixes) {
+        if (!hebrew.startsWith(p) || hebrew.length <= 3) continue;
+        const afterPrefix = hebrew.substring(1);
+        for (const s of suffixes) {
+            if (afterPrefix.endsWith(s) && afterPrefix.length > s.length + 1) {
+                const root = afterPrefix.substring(0, afterPrefix.length - s.length);
+                if (timelineData[root]) return timelineData[root];
+            }
+        }
+    }
+
+    // Two-char prefix + suffix combo
+    for (const p of twoPrefixes) {
+        if (!hebrew.startsWith(p) || hebrew.length <= p.length + 2) continue;
+        const afterPrefix = hebrew.substring(p.length);
+        for (const s of suffixes) {
+            if (afterPrefix.endsWith(s) && afterPrefix.length > s.length + 1) {
+                const root = afterPrefix.substring(0, afterPrefix.length - s.length);
+                if (timelineData[root]) return timelineData[root];
+            }
+        }
     }
 
     return null;
