@@ -107,21 +107,37 @@
             }
             html += '</div>';
 
-            // Hebrew text with clickable words
-            html += '<div class="original-text hebrew" lang="he" translate="no">';
+            // Hebrew text with clickable words + mechanical meaning underneath
+            html += '<div class="interlinear-container">';
             if (v.words && v.words.length > 0) {
                 for (var w = 0; w < v.words.length; w++) {
                     var word = v.words[w];
-                    html += '<span class="word" lang="he" translate="no" onclick="showWordEvolution(\'' +
-                            escapeHtml(word.hebrew) + '\')">' + escapeHtml(word.hebrew) + '</span> ';
+                    // Look up pictographic meaning from words.json (loaded by word-modal.js)
+                    var gloss = '';
+                    if (typeof wordData !== 'undefined' && wordData && wordData[word.hebrew]) {
+                        gloss = wordData[word.hebrew].pictographic || wordData[word.hebrew].definition || '';
+                    }
+                    if (!gloss && typeof lookupDefinition === 'function') {
+                        var def = lookupDefinition(word.hebrew);
+                        if (def) gloss = def.pictographic_meaning || def.definition || '';
+                    }
+                    // Truncate for display
+                    if (gloss.length > 30) gloss = gloss.substring(0, 30);
+                    html += '<div class="interlinear-word" onclick="showWordEvolution(\'' +
+                            escapeHtml(word.hebrew) + '\')">' +
+                            '<span class="il-hebrew">' + escapeHtml(word.hebrew) + '</span>' +
+                            '<span class="il-gloss">' + escapeHtml(gloss) + '</span>' +
+                            '<span class="il-translit">' + (word.gematria || '') + '</span>' +
+                            '</div>';
                 }
             } else if (v.hebrew) {
-                // Fallback: split hebrew text into words
                 var hwords = v.hebrew.split(' ');
                 for (var w = 0; w < hwords.length; w++) {
                     if (hwords[w]) {
-                        html += '<span class="word" lang="he" translate="no" onclick="showWordEvolution(\'' +
-                                escapeHtml(hwords[w]) + '\')">' + escapeHtml(hwords[w]) + '</span> ';
+                        html += '<div class="interlinear-word" onclick="showWordEvolution(\'' +
+                                escapeHtml(hwords[w]) + '\')">' +
+                                '<span class="il-hebrew">' + escapeHtml(hwords[w]) + '</span>' +
+                                '</div>';
                     }
                 }
             }
